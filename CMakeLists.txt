@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(MMOWorldPhysics CXX)
+project(3DVirtualWorldPhysics CXX)
 set(CMAKE_CXX_STANDARD 17)
 
 # Try to find Raylib (if already installed on system)
@@ -19,6 +19,10 @@ endif()
 # Your executable target
 add_executable(mmo-virtual-world
         src/main.cpp
+        src/Camera3D.cpp
+        src/Camera3D.h
+        src/Scene.cpp
+        src/Scene.h
 )
 
 # Link Raylib
