@@ -21,8 +21,14 @@ add_executable(mmo-virtual-world
         src/main.cpp
         src/Camera3DController.cpp
         src/Camera3DController.h
-        src/Scene.cpp
-        src/Scene.h
+        src/SceneManager.cpp
+        src/SceneManager.h
+        src/PhysicsObject.cpp
+        src/PhysicsObject.h
+        src/ObjectManager.cpp
+        src/ObjectManager.h
+        src/UIManager.cpp
+        src/UIManager.h
 )
 
 # Link Raylib

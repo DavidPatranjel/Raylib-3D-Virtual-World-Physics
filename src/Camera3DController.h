@@ -27,8 +27,8 @@ public:
     void ToggleFreeMode();      
     void Reset();
 
-
     Camera GetCamera() const { return camera; }
+    bool IsFreeMode() const { return isFreeMode; }
 };
 
 #endif //INC_3DVIRTUALWORLDPHYSICS_CAMERA3D_H
