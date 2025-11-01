@@ -25,6 +25,7 @@ public:
     ObjectManager(Vector3 boxCenter, float boxSize);
 
     void SpawnRandomObject();
+    void SpawnObject(ObjectType objectType);
     void Update(float deltaTime);
     void Draw() const;
     void Clear();

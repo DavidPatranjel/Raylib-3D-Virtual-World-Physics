@@ -11,6 +11,11 @@ ObjectManager::ObjectManager(Vector3 boxCenter, float boxSize)
 
 void ObjectManager::SpawnRandomObject() {
     ObjectType type = GetRandomObjectType();
+    SpawnObject(type);
+}
+
+void ObjectManager::SpawnObject(ObjectType objectType) {
+    ObjectType type = objectType;
     Vector3 position = GetRandomPositionInBox();
     Vector3 velocity = GetRandomVelocity();
     Color color = GetRandomColor();

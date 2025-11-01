@@ -4,7 +4,8 @@
 
 #include "UIManager.h"
 
-void UIManager::DrawGameUI(int objectCount, bool isFreeMode) {
+
+void UIManager::DrawGameUI(UIData uiData, bool isFreeMode) {
     int y = padding;
 
     DrawRectangle(0, 0, 250, (padding + lineHeight) * nrUIElements, backgroundColor);
@@ -13,8 +14,36 @@ void UIManager::DrawGameUI(int objectCount, bool isFreeMode) {
     DrawText(TextFormat("FPS: %d", fps), padding, y, fontSize, textColor);
     y += lineHeight;
 
-    DrawText(TextFormat("Objects: %d", objectCount), padding, y, fontSize, textColor);
+    DrawText(TextFormat("Objects: %d", uiData.objectCount), padding, y, fontSize, textColor);
     y += lineHeight;
+
+
+    if (uiData.mode == FMode::USER_MODE) {
+        DrawText("M - Toggle mode", padding, y, fontSize, textColor);
+        y += lineHeight;
+        DrawText(TextFormat("Mode: USER"), padding, y, fontSize, MAGENTA);
+        y += lineHeight;
+    }
+    else
+    {
+        const char* functionMode;
+        switch (uiData.genMode) {
+            case GenMode::GEN1:
+                functionMode = "GENERATING 1";
+                break;
+            case GenMode::GEN2:
+                functionMode = "GENERATING 2";
+                break;
+            case GenMode::GEN3:
+                functionMode = "GENERATING 3";
+
+        }
+
+        DrawText("M/1/2/3- Toggle mode", padding, y, fontSize, textColor);
+        y += lineHeight;
+        DrawText(TextFormat("Mode: %s", functionMode), padding, y, fontSize, BLUE);
+        y += lineHeight;
+    }
 
     DrawText("O - Spawn object", padding, y, fontSize, textColor);
     y += lineHeight;
@@ -26,6 +55,6 @@ void UIManager::DrawGameUI(int objectCount, bool isFreeMode) {
     y += lineHeight;
 
     const char* cameraMode = isFreeMode ? "FREE" : "STATIC";
-    Color modeColor = isFreeMode ? GREEN : ORANGE;
-    DrawText(TextFormat("Camera: %s", cameraMode), padding, y, fontSize, modeColor);
+    Color cameraModeColor = isFreeMode ? GREEN : ORANGE;
+    DrawText(TextFormat("Camera: %s", cameraMode), padding, y, fontSize, cameraModeColor);
 }

@@ -23,7 +23,7 @@ int main() {
         sceneManager.Draw();
         EndMode3D();
 
-        UIManager::DrawGameUI(sceneManager.GetObjectCount(), cameraController.IsFreeMode());
+        UIManager::DrawGameUI(sceneManager.GetUIData(), cameraController.IsFreeMode());
 
         EndDrawing();
     }

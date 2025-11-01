@@ -29,6 +29,8 @@ add_executable(mmo-virtual-world
         src/ObjectManager.h
         src/UIManager.cpp
         src/UIManager.h
+        src/FunctioningMode.cpp
+        src/FunctioningMode.h
 )
 
 # Link Raylib
