@@ -5,32 +5,54 @@
 #ifndef INC_3DVIRTUALWORLDPHYSICS_OBJECTMANAGER_H
 #define INC_3DVIRTUALWORLDPHYSICS_OBJECTMANAGER_H
 
-
-
 #include <vector>
 #include "PhysicsObject.h"
+#include "CollisionDetector.h"
 
-class ObjectManager {
+class ObjectManager
+{
 private:
-    Vector3 boxCenter;
     float boxSize;
+    Vector3 boxCenter;
     std::vector<PhysicsObject> objects;
+    CollisionDetector collisionDetector;
 
-    Vector3 GetRandomPositionInBox() const;
-    Vector3 GetRandomVelocity() const;
-    Color GetRandomColor() const;
-    ObjectType GetRandomObjectType() const;
+    [[nodiscard]] Vector3 GetRandomPositionInBox() const;
+
+    [[nodiscard]] static Color GetRandomColor();
+
+    [[nodiscard]] static ObjectType GetRandomObjectType();
+
+    static Vector3 GetRandomVelocity() ;
+
+    std::vector<Vector3> cubeVertices;
+    std::vector<Vector3> sphereVertices;
+    std::vector<Vector3> cylinderVertices;
 
 public:
+    std::vector<PhysicsObject> primitives;
+
     ObjectManager(Vector3 boxCenter, float boxSize);
 
-    void SpawnRandomObject();
+    [[nodiscard]] size_t GetObjectCount() const { return objects.size(); }
+
+    [[nodiscard]] size_t GetPairsCount() const { return primitives.size(); }
+
     void Update(float deltaTime);
-    void Draw() const;
+
+    void Draw();
+
     void Clear();
 
-    int GetObjectCount() const { return objects.size(); }
+    void SpawnRandomObject();
 
+    void SpawnPrimitives();
+
+    void CheckCollisions();
+
+    void ResetAllCollisions();
+
+    void setLocalVertices(PhysicsObject &object) const;
 };
 
 

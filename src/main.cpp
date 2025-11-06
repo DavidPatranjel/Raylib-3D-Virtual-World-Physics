@@ -5,13 +5,16 @@
 
 void DrawSceneCube();
 
-int main() {
+int main()
+{
     InitWindow(1200, 800, "3D Virtual World Physics");
     SetTargetFPS(60);
 
     Camera3DController cameraController;
     SceneManager sceneManager;
-    while (!WindowShouldClose()) {
+
+    while (!WindowShouldClose())
+    {
         Camera camera = cameraController.GetCamera();
         cameraController.Update();
         sceneManager.Update();
