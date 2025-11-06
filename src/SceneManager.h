@@ -33,6 +33,7 @@ private:
 
 public:
     SceneManager();
+    int GetObjectCount();
     UIData GetUIData() const;
     void Update();
     void Draw();
