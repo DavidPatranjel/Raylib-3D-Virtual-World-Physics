@@ -22,6 +22,10 @@ class CollisionDetector
     bool CheckSphereSphere(const PhysicsObject &a, const PhysicsObject &b);
 
     bool CheckSphereConvex(PhysicsObject& sphere, PhysicsObject& convex);
+private:
+    bool CheckSphereCube(PhysicsObject &sphere, const std::vector<Vector3> &cubeVertices);
+    bool CheckSphereCylinder(PhysicsObject &sphere, const std::vector<Vector3> &cylinderVertices);
+    float ClosestPointOnEdge(const Vector3 &point, const Vector3 &edgeStart, const Vector3 &edgeEnd);
 
 public:
     bool CheckConvexCollision(PhysicsObject a, PhysicsObject b);

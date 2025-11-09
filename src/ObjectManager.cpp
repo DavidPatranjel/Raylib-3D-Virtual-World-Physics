@@ -4,23 +4,26 @@
 
 #include "ObjectManager.h"
 
-#define CYLINDER_SIDES 16
-#define CYLINDER_RADIUS 1.0
-#define CYLINDER_HEIGHT 2.0
-#define CIRCLE_RINGS 16.0
+#define CYLINDER_SIDES 8
+#define CYLINDER_RADIUS 0.1
+#define CYLINDER_HEIGHT 0.2
+#define CUBE_HALF_LEN 0.1
+#define CIRCLE_RINGS 8
+#define SPHERE_RADIUS 0.1
+
 
 ObjectManager::ObjectManager(const Vector3 boxCenter, const float boxSize)
     : boxSize(boxSize), boxCenter(boxCenter)
 {
     cubeVertices = {
-        {-0.5f, -0.5f, -0.5f},
-        {0.5f, -0.5f, -0.5f},
-        {0.5f, 0.5f, -0.5f},
-        {-0.5f, 0.5f, -0.5f},
-        {-0.5f, -0.5f, 0.5f},
-        {0.5f, -0.5f, 0.5f},
-        {0.5f, 0.5f, 0.5f},
-        {-0.5f, 0.5f, 0.5f}
+        {-CUBE_HALF_LEN, -CUBE_HALF_LEN, -CUBE_HALF_LEN},
+        {CUBE_HALF_LEN, -CUBE_HALF_LEN, -CUBE_HALF_LEN},
+        {CUBE_HALF_LEN, CUBE_HALF_LEN, -CUBE_HALF_LEN},
+        {-CUBE_HALF_LEN, CUBE_HALF_LEN, -CUBE_HALF_LEN},
+        {-CUBE_HALF_LEN, -CUBE_HALF_LEN, CUBE_HALF_LEN},
+        {CUBE_HALF_LEN, -CUBE_HALF_LEN, CUBE_HALF_LEN},
+        {CUBE_HALF_LEN, CUBE_HALF_LEN, CUBE_HALF_LEN},
+        {-CUBE_HALF_LEN, CUBE_HALF_LEN, CUBE_HALF_LEN}
     };
 
     for (int i = 0; i < CYLINDER_SIDES; i++)
@@ -37,8 +40,8 @@ ObjectManager::ObjectManager(const Vector3 boxCenter, const float boxSize)
     for (int i = 0; i <= CIRCLE_RINGS; i++)
     {
         const auto phi = static_cast<float>((PI *  static_cast<float>(i)) / CIRCLE_RINGS); // latitude angle
-        const float y = cosf(phi) * 1;
-        const float r = sinf(phi) * 1; // ring radius
+        const float y = cosf(phi) * SPHERE_RADIUS;
+        const float r = sinf(phi) * SPHERE_RADIUS;
 
         for (int j = 0; j <= CIRCLE_RINGS; j++)
         {
@@ -71,28 +74,28 @@ void ObjectManager::SpawnObject(ObjectType objectType) {
 
 void ObjectManager::SpawnPrimitives()
 {
-    primitives.emplace_back(ObjectType::CUBE);
-    primitives.emplace_back(ObjectType::CUBE);
+    objects.emplace_back(ObjectType::CUBE);
+    objects.emplace_back(ObjectType::CUBE);
 
-    primitives.emplace_back(ObjectType::CYLINDER);
-    primitives.emplace_back(ObjectType::CYLINDER);
+    objects.emplace_back(ObjectType::CYLINDER);
+    objects.emplace_back(ObjectType::CYLINDER);
 
-    primitives.emplace_back(ObjectType::CUBE);
-    primitives.emplace_back(ObjectType::CYLINDER);
+    objects.emplace_back(ObjectType::CUBE);
+    objects.emplace_back(ObjectType::CYLINDER);
 
-    primitives.emplace_back(ObjectType::SPHERE);
-    primitives.emplace_back(ObjectType::SPHERE);
+    objects.emplace_back(ObjectType::SPHERE);
+    objects.emplace_back(ObjectType::SPHERE);
 
-    primitives.emplace_back(ObjectType::SPHERE);
-    primitives.emplace_back(ObjectType::CUBE);
+    objects.emplace_back(ObjectType::SPHERE);
+    objects.emplace_back(ObjectType::CUBE);
 
-    primitives.emplace_back(ObjectType::SPHERE);
-    primitives.emplace_back(ObjectType::CYLINDER);
+    objects.emplace_back(ObjectType::SPHERE);
+    objects.emplace_back(ObjectType::CYLINDER);
 
     int i = 0;
     int j = 0;
 
-    for (auto & primitive : primitives)
+    for (auto & primitive : objects)
     {
         setLocalVertices(primitive);
 
@@ -113,19 +116,16 @@ void ObjectManager::setLocalVertices(PhysicsObject &object) const
         object.SetLocalVertices(cylinderVertices);
     if (object.GetType() == ObjectType::SPHERE)
         object.SetLocalVertices(sphereVertices);
-    if (object.GetType() == ObjectType::SPHERE)
-        object.SetLocalVertices(sphereVertices);
 }
 
-void ObjectManager::Update(float deltaTime)
-{
+void ObjectManager::Update(float deltaTime, bool debug) {
     ResetAllCollisions();
 
+    if (debug)
+        HandleMoveDebugObjects();
+    
     for (auto& obj : objects)
         obj.Update(deltaTime);
-
-    for (auto &obj: primitives)
-         obj.Update(deltaTime);
 
     if (IsKeyPressed(KEY_R))
         Clear();
@@ -133,12 +133,43 @@ void ObjectManager::Update(float deltaTime)
     CheckCollisions();
 }
 
+void ObjectManager::HandleMoveDebugObjects() {
+    if (IsKeyPressed(KEY_FOUR)) {
+        Vector3 newVelocity = {1.0f, 0.0f, 0.0f};
+        for (int i = 1; i < GetObjectCount(); i+=2)
+        {
+            objects.at(i).SetVelocity(newVelocity);
+        }
+    }
+    if (IsKeyReleased(KEY_FOUR)) {
+        for (int i = 1; i < GetObjectCount(); i+=2)
+        {
+            objects.at(i).SetVelocity({0, 0, 0});
+        }
+    }
+
+    if (IsKeyPressed(KEY_SIX)) {
+        Vector3 newVelocity = {-1.0f, 0.0f, 0.0f};
+        for (int i = 1; i < GetObjectCount(); i+=2)
+        {
+            objects.at(i).SetVelocity(newVelocity);
+        }
+    }
+    if (IsKeyReleased(KEY_SIX)) {
+        for (int i = 1; i < GetObjectCount(); i+=2)
+        {
+            objects.at(i).SetVelocity({0, 0, 0});
+        }
+
+    }
+}
+
 void ObjectManager::Draw()
 {
     for (auto& obj : objects)
         obj.Draw();
 
-    for (auto &obj: primitives)
+    for (auto &obj: objects)
         obj.Draw();
 }
 
@@ -185,17 +216,17 @@ ObjectType ObjectManager::GetRandomObjectType() const
 
 void ObjectManager::CheckCollisions()
 {
-    if (primitives.empty())
+    if (objects.empty())
         return;
 
-    for (int i = 0; i < primitives.size() - 1; i++)
+    for (int i = 0; i < objects.size() - 1; i++)
     {
-        for (int j = i + 1; j < primitives.size(); j++)
+        for (int j = i + 1; j < objects.size(); j++)
         {
-            if (collisionDetector.CheckConvexCollision(primitives.at(i), primitives.at(j)))
+            if (collisionDetector.CheckConvexCollision(objects.at(i), objects.at(j)))
             {
-                primitives.at(i).SetIsColliding(true);
-                primitives.at(j).SetIsColliding(true);
+                objects.at(i).SetIsColliding(true);
+                objects.at(j).SetIsColliding(true);
             }
         }
     }
@@ -203,6 +234,6 @@ void ObjectManager::CheckCollisions()
 
 void ObjectManager::ResetAllCollisions()
 {
-    for (auto &object: primitives)
+    for (auto &object: objects)
         object.SetIsColliding(false);
 }

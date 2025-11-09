@@ -48,8 +48,8 @@ PhysicsObject::PhysicsObject(ObjectType type)
     SetRandomRotationAxis();
     transform = MatrixIdentity();
     isColliding = false;
-    size = 1;
-    radius = 1;
+    size = 0.1;
+    radius = 0.1;
 }
 
 PhysicsObject::PhysicsObject(ObjectType type, Vector3 position, Vector3 velocity, Color color):
@@ -58,8 +58,8 @@ PhysicsObject::PhysicsObject(ObjectType type, Vector3 position, Vector3 velocity
     SetRandomRotationAxis();
     transform = MatrixIdentity();
     isColliding = false;
-    size = 1;
-    radius = 1;
+    size = 0.1;
+    radius = 0.1;
 }
 
 void PhysicsObject::Update(const float deltaTime)
@@ -104,7 +104,7 @@ void PhysicsObject::Draw()
         color = GREEN;
 
     for (int i = 0; i < half; i++)
-        DrawLine3D(worldVertices[i], worldVertices[i + half], this->color);
+            DrawLine3D(worldVertices[i], worldVertices[i + half], this->color);
 
     for (int i = 0; i < half; i++)
     {
@@ -135,6 +135,22 @@ void PhysicsObject::DrawSphere()
         {
             const int index1 = i * (slices + 1) + j;
             int index2 = index1 + 1;
+            if (index2 < this->localVertices.size())
+            {
+                DrawLine3D(Vector3Transform(this->localVertices[index1], transform),
+                           Vector3Transform(this->localVertices[index2], transform),
+                           this->color);
+            }
+        }
+    }
+
+    for (int j = 0; j <= slices; j++)
+    {
+        for (int i = 0; i < rings; i++)
+        {
+            const int index1 = i * (slices + 1) + j;
+            const int index2 = (i + 1) * (slices + 1) + j;
+
             if (index2 < this->localVertices.size())
             {
                 DrawLine3D(Vector3Transform(this->localVertices[index1], transform),

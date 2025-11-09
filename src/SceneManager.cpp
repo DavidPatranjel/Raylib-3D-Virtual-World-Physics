@@ -18,49 +18,14 @@ int SceneManager::GetObjectCount() {
 }
 
 void SceneManager::Update() {
-
-    if (IsKeyReleased(KEY_P))
-        objectManager.SpawnPrimitives();
-
     if (IsKeyReleased(KEY_O))
         objectManager.SpawnRandomObject();
 
-    if (IsKeyPressed(KEY_A)) {
-        Vector3 newVelocity = {1.0f, 0.0f, 0.0f};
-        for (int i = 0; i < objectManager.GetPairsCount(); i++)
-        {
-            if (i % 2 != 0)
-                objectManager.primitives.at(i).SetVelocity(newVelocity);
-        }
-    }
-    if (IsKeyReleased(KEY_A)) {
-        for (int i = 0; i < objectManager.GetPairsCount(); i++)
-        {
-            if (i % 2 != 0)
-                objectManager.primitives.at(i).SetVelocity({0, 0, 0});
-        }
-    }
-
-    if (IsKeyPressed(KEY_D)) {
-        Vector3 newVelocity = {-1.0f, 0.0f, 0.0f};
-        for (int i = 0; i < objectManager.GetPairsCount(); i++)
-        {
-            if (i % 2 != 0)
-                objectManager.primitives.at(i).SetVelocity(newVelocity);
-        }
-    }
-    if (IsKeyReleased(KEY_D)) {
-        for (int i = 0; i < objectManager.GetPairsCount(); i++)
-        {
-            if (i % 2 != 0)
-                objectManager.primitives.at(i).SetVelocity({0, 0, 0});
-        }
-
-    }
-
     functioningMode.Update();
     VerifyModeModif();
-    objectManager.Update(GetFrameTime());
+
+    const bool debug = functioningMode.GetMode() == FMode::DEBUG_MODE;
+    objectManager.Update(GetFrameTime(), debug);
 }
 
 void SceneManager::Draw() {
@@ -83,14 +48,22 @@ void SceneManager::VerifyModeModif() {
         if (modes.mode == FMode::GEN_MODE) {
             GenerateObjects(modes.genMode);
         }
-        else {
+        else if (modes.mode == FMode::USER_MODE){
             objectManager.Clear();
             std::cout << "Switched to user mode" << std::endl;
+        }
+        else if (modes.mode == FMode::DEBUG_MODE){
+            GenerateDebugObjects();
+            std::cout << "Switched to debug mode" << std::endl;
         }
         oldMode = modes;
     }
 }
 
+void SceneManager::GenerateDebugObjects() {
+    objectManager.Clear();
+    objectManager.SpawnPrimitives();
+}
 
 void SceneManager::GenerateObjects(GenMode genMode) {
     objectManager.Clear();

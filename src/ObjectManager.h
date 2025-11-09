@@ -13,7 +13,6 @@ class ObjectManager {
 private:
     float boxSize;
     Vector3 boxCenter;
-    std::vector<PhysicsObject> objects;
     CollisionDetector collisionDetector;
 
 
@@ -25,23 +24,17 @@ private:
     std::vector<Vector3> sphereVertices;
     std::vector<Vector3> cylinderVertices;
 public:
-    std::vector<PhysicsObject> primitives;
-
+    std::vector<PhysicsObject> objects;
     ObjectManager(Vector3 boxCenter, float boxSize);
 
     void SpawnRandomObject();
     void SpawnObject(ObjectType objectType);
-    void Update(float deltaTime);
-
+    void Update(float deltaTime, bool debug);
+    void HandleMoveDebugObjects();
     void Draw();
-
     void Clear();
-
     void SpawnPrimitives();
-    [[nodiscard]] size_t GetObjectCount() const { return objects.size(); }
-
-    [[nodiscard]] size_t GetPairsCount() const { return primitives.size(); }
-
+    size_t GetObjectCount() const { return objects.size(); }
     void CheckCollisions();
     void ResetAllCollisions();
     void setLocalVertices(PhysicsObject &object) const;

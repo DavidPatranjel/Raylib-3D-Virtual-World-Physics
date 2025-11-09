@@ -10,7 +10,7 @@
 #include "raylib.h"
 
 struct UIData {
-    int objectCount;
+    size_t objectCount;
     FMode mode;
     GenMode genMode;
 };
@@ -38,6 +38,7 @@ public:
     void Update();
     void Draw();
     void VerifyModeModif();
+    void GenerateDebugObjects();
     void GenerateObjects(GenMode genMode);
 };
 
