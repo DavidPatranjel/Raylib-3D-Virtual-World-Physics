@@ -19,12 +19,13 @@ class SceneManager {
 private:
     std::vector<std::vector<int>> genObjects = {
         {10, 25, 50},   // gen 1
+        {100, 250, 500},   // gen 1
         {250, 500, 1000},  // gen 2
         {500, 1000, 2500}  // gen 3
     };
 
     static constexpr Vector3 boxPosition = { 0.0f, 0.0f, 0.0f };
-    static constexpr float boxSize = 5.0f;
+    static constexpr float boxSize = 6.0f;
     ObjectManager objectManager;
     FunctioningMode functioningMode;
     AllModes oldMode = {FMode::USER_MODE, GenMode::GEN1};

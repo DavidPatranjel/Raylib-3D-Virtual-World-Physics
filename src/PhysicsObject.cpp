@@ -3,6 +3,10 @@
 //
 
 #include "PhysicsObject.h"
+
+#include <iostream>
+#include <ostream>
+
 #include "raymath.h"
 
 ObjectType PhysicsObject::GetType() const { return type; }
@@ -41,12 +45,6 @@ void PhysicsObject::SetRandomRotationAxis()
     rotationAxis.y = static_cast<float>(GetRandomValue(-1.0f, 1.0f));
     rotationAxis.z = static_cast<float>(GetRandomValue(-1.0f, 1.0f));
 }
-void PhysicsObject::SetRandomVelocity()
-{
-    velocity.x = static_cast<float>(GetRandomValue(-5.0f, 5.0f));
-    velocity.y = static_cast<float>(GetRandomValue(-5.0f, 5.0f));
-    velocity.z = static_cast<float>(GetRandomValue(-5.0f, 5.0f));
-}
 
 PhysicsObject::PhysicsObject(ObjectType type)
     : type(type), position({0.0f, 0.0f, 0.0f}), velocity({0.0f, 0.0f, 0.0f})
@@ -76,9 +74,58 @@ PhysicsObject::PhysicsObject(ObjectType type, Vector3 position, Vector3 velocity
 
 void PhysicsObject::Update(const float deltaTime)
 {
-    position.x += velocity.x * deltaTime;
-    position.y += velocity.y * deltaTime;
-    position.z += velocity.z * deltaTime;
+    position = Vector3Add(position, Vector3Scale(velocity, deltaTime));
+    HandlePhysics(deltaTime);
+}
+
+void PhysicsObject::HandlePhysics(const float deltaTime) {
+    /// gravity
+     float limits = SPACE_LIMITS - 0.1;
+    float limit_offet = 0.001f;
+    if (Vector2Length(Vector2{ velocity.x, velocity.z }) < 0.001f && position.y < -limits) {
+        position.y = -limits + limit_offet;
+        velocity.y = 0.0f;
+        return;
+    }
+    velocity.y -= GRAVITY * deltaTime;
+
+    /// friction
+    velocity.x *= FRICTION_INV;
+    velocity.y *= FRICTION_INV;
+    velocity.z *= FRICTION_INV;
+
+
+    if (position.x > limits) {
+        isColliding = true;
+        position.x = limits - limit_offet;
+    }
+    else if (position.y > limits) {
+        position.y =  limits - limit_offet;
+        isColliding = true;
+    }
+    else if (position.z > limits) {
+        position.z = limits - limit_offet;
+        isColliding = true;
+    }
+    else if (position.x < -limits) {
+        position.x = -limits + limit_offet;
+        isColliding = true;
+    }
+    else if (position.y < -limits) {
+        position.y = -limits + limit_offet;
+        isColliding = true;
+    }
+    else if (position.z < -limits) {
+        position.z = -limits + limit_offet;
+        isColliding = true;
+    }
+
+    if (isColliding) {
+        isColliding = false;
+        velocity.x = -velocity.x * ENERGY_LOSS;
+        velocity.y = -velocity.y * ENERGY_LOSS;
+        velocity.z = -velocity.z * ENERGY_LOSS;
+    }
 }
 
 void PhysicsObject::Rotate()
@@ -156,19 +203,4 @@ void PhysicsObject::DrawSphere()
         }
     }
 
-    // for (int j = 0; j <= slices; j++)
-    // {
-    //     for (int i = 0; i < rings; i++)
-    //     {
-    //         const int index1 = i * (slices + 1) + j;
-    //         const int index2 = (i + 1) * (slices + 1) + j;
-    //
-    //         if (index2 < this->localVertices.size())
-    //         {
-    //             DrawLine3D(Vector3Transform(this->localVertices[index1], transform),
-    //                        Vector3Transform(this->localVertices[index2], transform),
-    //                        this->color);
-    //         }
-    //     }
-    // }
 }

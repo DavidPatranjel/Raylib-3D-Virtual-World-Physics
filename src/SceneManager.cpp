@@ -20,9 +20,12 @@ int SceneManager::GetObjectCount() {
 void SceneManager::Update() {
     if (IsKeyReleased(KEY_O) && functioningMode.GetMode() == FMode::USER_MODE)
         objectManager.SpawnRandomObject();
+
     if (IsKeyReleased(KEY_SPACE) && functioningMode.GetMode() == FMode::USER_MODE)
-        for (auto &object : objectManager.objects)
-            object.SetRandomVelocity();
+        for (auto &object : objectManager.objects) {
+            Vector3 velocity = objectManager.GetRandomVelocity();
+            object.SetVelocity(velocity);
+        }
 
     functioningMode.Update();
     VerifyModeModif();

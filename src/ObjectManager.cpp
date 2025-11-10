@@ -196,9 +196,9 @@ Vector3 ObjectManager::GetRandomVelocity() const
     // Viteze aleatorii pt fiecare axă//
     return
     {
-        static_cast<float>(GetRandomValue(-200, 200)) / 100.0f,
-        static_cast<float>(GetRandomValue(-200, 200)) / 100.0f,
-        static_cast<float>(GetRandomValue(-200, 200)) / 100.0f
+        static_cast<float>(GetRandomValue(-MAX_SPEED, MAX_SPEED)) / 100.0f,
+        static_cast<float>(GetRandomValue(-MAX_SPEED, MAX_SPEED)) / 100.0f,
+        static_cast<float>(GetRandomValue(-MAX_SPEED, MAX_SPEED)) / 100.0f
     };
 }
 

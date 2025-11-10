@@ -8,6 +8,7 @@
 #include <vector>
 #include "PhysicsObject.h"
 #include "CollisionDetector.h"
+#define MAX_SPEED 1000
 
 class ObjectManager {
 private:
@@ -17,7 +18,6 @@ private:
 
 
     Vector3 GetRandomPositionInBox() const;
-    Vector3 GetRandomVelocity() const;
     Color GetRandomColor() const;
     ObjectType GetRandomObjectType() const;
     std::vector<Vector3> cubeVertices;
@@ -26,7 +26,7 @@ private:
 public:
     std::vector<PhysicsObject> objects;
     ObjectManager(Vector3 boxCenter, float boxSize);
-
+    Vector3 GetRandomVelocity() const;
     void SpawnRandomObject();
     void SpawnObject(ObjectType objectType);
     void Update(float deltaTime, bool debug);

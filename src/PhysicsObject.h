@@ -4,7 +4,10 @@
 
 #ifndef INC_3DVIRTUALWORLDPHYSICS_PHYSICSOBJECT_H
 #define INC_3DVIRTUALWORLDPHYSICS_PHYSICSOBJECT_H
-
+#define GRAVITY 3.0f
+#define FRICTION_INV 0.97f
+#define SPACE_LIMITS 3
+#define ENERGY_LOSS 0.85f
 
 #include "raylib.h"
 #include "raymath.h"
@@ -27,7 +30,6 @@ private:
     Vector3 velocity;
     Vector3 rotationAxis;
     Vector3 center;
-    // Vector3 axes[3]; //???
 
     bool isColliding;
     float rotationSpeed = 0.01;
@@ -73,9 +75,9 @@ public:
 
     void SetRandomRotationAxis();
 
-    void SetRandomVelocity();
-
     void Update(float deltaTime);
+
+    void HandlePhysics(const float deltaTime);
 
     void Draw();
 
