@@ -42,6 +42,7 @@ void SceneManager::Draw() {
 UIData SceneManager::GetUIData() const {
     return UIData{
         objectManager.GetObjectCount(),
+        objectManager.physics_time,
         functioningMode.GetMode(),
         functioningMode.GetGenMode()
     };

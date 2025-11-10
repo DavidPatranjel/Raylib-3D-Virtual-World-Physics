@@ -24,6 +24,8 @@ private:
     std::vector<Vector3> sphereVertices;
     std::vector<Vector3> cylinderVertices;
 public:
+    int physics_time;
+    bool firstMeasurementDone = false;
     std::vector<PhysicsObject> objects;
     ObjectManager(Vector3 boxCenter, float boxSize);
     Vector3 GetRandomVelocity() const;

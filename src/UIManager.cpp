@@ -14,6 +14,9 @@ void UIManager::DrawGameUI(UIData uiData, bool isFreeMode) {
     DrawText(TextFormat("FPS: %d", fps), padding, y, fontSize, textColor);
     y += lineHeight;
 
+    DrawText(TextFormat("Time (ms): %d", uiData.time), padding, y, fontSize, textColor);
+    y += lineHeight;
+
     DrawText(TextFormat("Objects: %d", uiData.objectCount), padding, y, fontSize, textColor);
     y += lineHeight;
 

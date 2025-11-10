@@ -11,6 +11,7 @@
 
 struct UIData {
     size_t objectCount;
+    int time;
     FMode mode;
     GenMode genMode;
 };

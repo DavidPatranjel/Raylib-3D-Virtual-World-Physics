@@ -3,6 +3,7 @@
 //
 
 #include "ObjectManager.h"
+#include <chrono>
 
 #define CYLINDER_SIDES 8
 #define CYLINDER_RADIUS 0.1
@@ -56,6 +57,7 @@ ObjectManager::ObjectManager(const Vector3 boxCenter, const float boxSize)
 
 void ObjectManager::SpawnRandomObject()
 {
+    firstMeasurementDone = false;
     ObjectType type = GetRandomObjectType();
     SpawnObject(type);
 }
@@ -119,11 +121,16 @@ void ObjectManager::setLocalVertices(PhysicsObject &object) const
 }
 
 void ObjectManager::Update(float deltaTime, bool debug) {
+    std::chrono::time_point<std::chrono::high_resolution_clock> start, end;
+
+    if (!firstMeasurementDone)
+        start = std::chrono::high_resolution_clock::now();
+
     ResetAllCollisions();
 
     if (debug)
         HandleMoveDebugObjects();
-    
+
     for (auto& obj : objects)
         obj.Update(deltaTime);
 
@@ -131,7 +138,15 @@ void ObjectManager::Update(float deltaTime, bool debug) {
         Clear();
 
     CheckCollisions();
+
+    if (!firstMeasurementDone) {
+        end = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<float, std::milli> duration = end - start;
+        physics_time = duration.count();
+        firstMeasurementDone = true; // don’t measure again
+    }
 }
+
 
 void ObjectManager::HandleMoveDebugObjects() {
     if (IsKeyPressed(KEY_FOUR)) {
@@ -175,6 +190,7 @@ void ObjectManager::Draw()
 
 void ObjectManager::Clear()
 {
+    firstMeasurementDone = false;
     objects.clear();
 }
 
