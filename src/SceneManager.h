@@ -18,7 +18,7 @@ struct UIData {
 class SceneManager {
 private:
     std::vector<std::vector<int>> genObjects = {
-        {100, 250, 500},   // gen 1
+        {10, 25, 50},   // gen 1
         {250, 500, 1000},  // gen 2
         {500, 1000, 2500}  // gen 3
     };
