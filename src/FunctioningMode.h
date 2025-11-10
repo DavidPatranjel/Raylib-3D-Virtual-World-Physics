@@ -26,7 +26,7 @@ struct AllModes {
 
 class FunctioningMode {
 private:
-    FMode mode = FMode::USER_MODE;
+    FMode mode = FMode::GEN_MODE;
     GenMode genMode = GenMode::GEN1;
 
 public:

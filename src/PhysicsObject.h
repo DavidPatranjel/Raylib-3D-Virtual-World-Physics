@@ -21,7 +21,7 @@ class PhysicsObject
 {
 private:
     ObjectType type;
-
+    Model model;
     std::vector<Vector3> localVertices;
     Vector3 position = {0, 0, 0};
     Vector3 velocity;
@@ -72,6 +72,8 @@ public:
     void SetLocalVertices(const std::vector<Vector3> &inputLocalVertices);
 
     void SetRandomRotationAxis();
+
+    void SetRandomVelocity();
 
     void Update(float deltaTime);
 

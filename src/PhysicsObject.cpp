@@ -41,6 +41,12 @@ void PhysicsObject::SetRandomRotationAxis()
     rotationAxis.y = static_cast<float>(GetRandomValue(-1.0f, 1.0f));
     rotationAxis.z = static_cast<float>(GetRandomValue(-1.0f, 1.0f));
 }
+void PhysicsObject::SetRandomVelocity()
+{
+    velocity.x = static_cast<float>(GetRandomValue(-5.0f, 5.0f));
+    velocity.y = static_cast<float>(GetRandomValue(-5.0f, 5.0f));
+    velocity.z = static_cast<float>(GetRandomValue(-5.0f, 5.0f));
+}
 
 PhysicsObject::PhysicsObject(ObjectType type)
     : type(type), position({0.0f, 0.0f, 0.0f}), velocity({0.0f, 0.0f, 0.0f})
@@ -50,6 +56,9 @@ PhysicsObject::PhysicsObject(ObjectType type)
     isColliding = false;
     size = 0.1;
     radius = 0.1;
+
+    if (type == ObjectType::SPHERE)
+        model = LoadModelFromMesh(GenMeshSphere(radius, 16, 16));
 }
 
 PhysicsObject::PhysicsObject(ObjectType type, Vector3 position, Vector3 velocity, Color color):
@@ -60,6 +69,9 @@ PhysicsObject::PhysicsObject(ObjectType type, Vector3 position, Vector3 velocity
     isColliding = false;
     size = 0.1;
     radius = 0.1;
+
+    if (type == ObjectType::SPHERE)
+        model = LoadModelFromMesh(GenMeshSphere(radius, 16, 16));
 }
 
 void PhysicsObject::Update(const float deltaTime)
@@ -144,19 +156,19 @@ void PhysicsObject::DrawSphere()
         }
     }
 
-    for (int j = 0; j <= slices; j++)
-    {
-        for (int i = 0; i < rings; i++)
-        {
-            const int index1 = i * (slices + 1) + j;
-            const int index2 = (i + 1) * (slices + 1) + j;
-
-            if (index2 < this->localVertices.size())
-            {
-                DrawLine3D(Vector3Transform(this->localVertices[index1], transform),
-                           Vector3Transform(this->localVertices[index2], transform),
-                           this->color);
-            }
-        }
-    }
+    // for (int j = 0; j <= slices; j++)
+    // {
+    //     for (int i = 0; i < rings; i++)
+    //     {
+    //         const int index1 = i * (slices + 1) + j;
+    //         const int index2 = (i + 1) * (slices + 1) + j;
+    //
+    //         if (index2 < this->localVertices.size())
+    //         {
+    //             DrawLine3D(Vector3Transform(this->localVertices[index1], transform),
+    //                        Vector3Transform(this->localVertices[index2], transform),
+    //                        this->color);
+    //         }
+    //     }
+    // }
 }
