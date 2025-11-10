@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(3DVirtualWorldPhysics CXX)
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
 
 # Try to find Raylib (if already installed on system)
 find_package(raylib 4.5 QUIET)
