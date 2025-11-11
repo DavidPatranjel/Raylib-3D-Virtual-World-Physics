@@ -8,7 +8,7 @@
 #include <vector>
 #include "PhysicsObject.h"
 #include "CollisionDetector.h"
-#define MAX_SPEED 1000
+#define MAX_SPEED 10
 
 class ObjectManager {
 private:

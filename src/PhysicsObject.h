@@ -4,7 +4,7 @@
 
 #ifndef INC_3DVIRTUALWORLDPHYSICS_PHYSICSOBJECT_H
 #define INC_3DVIRTUALWORLDPHYSICS_PHYSICSOBJECT_H
-#define GRAVITY 3.0f
+#define GRAVITY 1.0f
 #define FRICTION_INV 0.97f
 #define SPACE_LIMITS 3
 #define ENERGY_LOSS 0.85f
@@ -37,6 +37,7 @@ private:
     float radius;
     Color color;
 
+    float totalRotationAngle = 0;
     Matrix rotationMatrix = MatrixIdentity();
     Matrix transform;
 
@@ -84,6 +85,8 @@ public:
     void DrawSphere();
 
     void Rotate();
+    void DrawCylinder(Color renderColor);
+
 };
 
 #endif //INC_3DVIRTUALWORLDPHYSICS_PHYSICSOBJECT_H

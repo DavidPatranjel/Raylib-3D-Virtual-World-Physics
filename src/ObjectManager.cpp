@@ -184,8 +184,6 @@ void ObjectManager::Draw()
     for (auto& obj : objects)
         obj.Draw();
 
-    for (auto &obj: objects)
-        obj.Draw();
 }
 
 void ObjectManager::Clear()

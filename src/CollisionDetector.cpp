@@ -49,13 +49,13 @@ std::vector<Vector3> CollisionDetector::GetFaceNormals(const std::vector<Vector3
     return normals;
 }
 
-bool CollisionDetector::CheckSphereSphere(const PhysicsObject &a, const PhysicsObject &b)
-{
-    float distance = Vector3Distance(a.GetPosition(), b.GetPosition());
-    float radiusSum = a.GetSize() + b.GetSize();
-
-    return distance < radiusSum;
-}
+// bool CollisionDetector::CheckSphereSphere(const PhysicsObject &a, const PhysicsObject &b)
+// {
+//     float distance = Vector3Distance(a.GetPosition(), b.GetPosition());
+//     float radiusSum = a.GetSize() + b.GetSize();
+//
+//     return distance < radiusSum;
+// }
 
 ///TODO: CHECK THIS
 bool CollisionDetector::CheckSphereConvex(PhysicsObject &sphere, PhysicsObject &convex)
@@ -342,8 +342,15 @@ float CollisionDetector::ClosestPointOnEdge(const Vector3 &point, const Vector3 
 
 bool CollisionDetector::CheckConvexCollision(PhysicsObject a, PhysicsObject b)
 {
-    if (a.GetType() == ObjectType::SPHERE && b.GetType() == ObjectType::SPHERE)
-        return CheckSphereSphere(a, b);
+    float distanceSq = Vector3DistanceSqr(a.GetPosition(), b.GetPosition());
+    float radiusSum = a.GetRadius() + b.GetRadius();
+
+    // If distance between centers is greater than sum of radii, they cannot collide
+    if (distanceSq > radiusSum * radiusSum)
+        return false;
+    if (distanceSq < radiusSum * radiusSum && a.GetType() == ObjectType::SPHERE && b.GetType() == ObjectType::SPHERE)
+        return true;
+
     if (a.GetType() == ObjectType::SPHERE && b.GetType() != ObjectType::SPHERE)
         return CheckSphereConvex(a, b);
     if (a.GetType() != ObjectType::SPHERE && b.GetType() == ObjectType::SPHERE)
