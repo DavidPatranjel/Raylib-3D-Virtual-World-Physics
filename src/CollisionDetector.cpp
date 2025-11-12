@@ -347,7 +347,9 @@ bool CollisionDetector::CheckConvexCollision(PhysicsObject a, PhysicsObject b)
 
     // If distance between centers is greater than sum of radii, they cannot collide
     if (distanceSq > radiusSum * radiusSum)
+    {
         return false;
+    }
     if (distanceSq < radiusSum * radiusSum && a.GetType() == ObjectType::SPHERE && b.GetType() == ObjectType::SPHERE)
         return true;
 

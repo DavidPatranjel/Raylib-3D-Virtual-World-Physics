@@ -32,14 +32,14 @@ private:
     Vector3 center;
 
     bool isColliding;
-    float rotationSpeed = 0.01;
+    float rotationSpeed = 0.03;
     float size;
     float radius;
     Color color;
 
     float totalRotationAngle = 0;
     Matrix rotationMatrix = MatrixIdentity();
-    Matrix transform;
+    Matrix transform = MatrixIdentity();
 
 public:
     explicit PhysicsObject(ObjectType type);
@@ -72,7 +72,7 @@ public:
 
     void SetIsColliding(bool inputIsColliding);
 
-    void SetLocalVertices(const std::vector<Vector3> &inputLocalVertices);
+    void SetLocalVertices(const std::vector<Vector3> inputLocalVertices);
 
     void SetRandomRotationAxis();
 
@@ -85,7 +85,13 @@ public:
     void DrawSphere();
 
     void Rotate();
+
     void DrawCylinder(Color renderColor);
+
+    void CreateCylinderMesh();
+
+    void DrawCubeWireframe(Color color);
+
 
 };
 

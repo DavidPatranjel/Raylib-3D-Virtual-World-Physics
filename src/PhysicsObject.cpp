@@ -8,6 +8,9 @@
 #include <ostream>
 
 #include "raymath.h"
+#define CYLINDER_SIDES 4
+#define CYLINDER_RADIUS 0.1
+#define CYLINDER_HEIGHT 0.2
 
 ObjectType PhysicsObject::GetType() const { return type; }
 
@@ -17,7 +20,7 @@ Vector3 PhysicsObject::GetVelocity() const { return velocity; }
 
 float PhysicsObject::GetSize() const { return size; }
 
-float PhysicsObject::GetRadius() const { return this -> radius; }
+float PhysicsObject::GetRadius() const { return this->radius; }
 
 std::vector<Vector3> PhysicsObject::GetLocalVertices() { return this->localVertices; }
 
@@ -33,13 +36,29 @@ void PhysicsObject::SetPosition(const Vector3 inputPosition) { this->position = 
 
 void PhysicsObject::SetIsColliding(const bool inputIsColliding) { this->isColliding = inputIsColliding; }
 
-void PhysicsObject::SetLocalVertices(const std::vector<Vector3> &inputLocalVertices)
+// void PhysicsObject::SetLocalVertices(const std::vector<Vector3> inputLocalVertices)
+// {
+//     localVertices.clear();
+//     this->localVertices = inputLocalVertices;
+//
+//     if (this -> type == ObjectType::CYLINDER)
+//     {
+//         CreateCylinderMesh();
+//     }
+// }
+
+void PhysicsObject::SetLocalVertices(const std::vector<Vector3> inputLocalVertices)
 {
     // localVertices.clear();
     // this->localVertices = inputLocalVertices;
 
     localVertices.clear();
     this->localVertices = inputLocalVertices;
+
+    if (this -> type == ObjectType::CYLINDER)
+    {
+        CreateCylinderMesh();
+    }
 
     // FIX: Calculate the actual radius based on the furthest vertex
     // This ensures the Fast Check in CollisionDetector is accurate.
@@ -55,11 +74,22 @@ void PhysicsObject::SetLocalVertices(const std::vector<Vector3> &inputLocalVerti
     if (this->radius == 0) this->radius = 0.1f;
 }
 
+
 void PhysicsObject::SetRandomRotationAxis()
 {
+    rotationAxis.x = 0;
+    // rotationAxis.y = 0;
+    rotationAxis.z = 0;
     rotationAxis.x = static_cast<float>(GetRandomValue(-1.0f, 1.0f));
     rotationAxis.y = static_cast<float>(GetRandomValue(-1.0f, 1.0f));
     rotationAxis.z = static_cast<float>(GetRandomValue(-1.0f, 1.0f));
+    // do
+    // {
+    //     // rotationAxis.x = static_cast<float>(GetRandomValue(-1.0f, 1.0f));
+    //     // rotationAxis.y = static_cast<float>(GetRandomValue(-1.0f, 1.0f));
+    //     // rotationAxis.z = static_cast<float>(GetRandomValue(-1.0f, 1.0f));
+    // }
+    // while (rotationAxis.x == 0.0f || rotationAxis.y == 0.0f || rotationAxis.z == 0.0f);
 }
 
 PhysicsObject::PhysicsObject(ObjectType type)
@@ -81,22 +111,14 @@ PhysicsObject::PhysicsObject(ObjectType type)
         model = LoadModelFromMesh(GenMeshCube(0.2, 0.2, 0.2));
         color = GREEN;
     }
-    else if (type == ObjectType::CYLINDER) {
-        // --- APPLY THE SAME FIX HERE ---
-        const float cylRadius = 0.1f;
-        const float cylHeight = 0.2f;
-        Mesh mesh = GenMeshCylinder(cylRadius, cylHeight, 8);
-
-        for (int i = 0; i < mesh.vertexCount; i++) {
-            mesh.vertices[i * 3 + 1] -= cylHeight / 2.0f;
-        }
-        model = LoadModelFromMesh(mesh);
-        color = PURPLE;
+    if (type == ObjectType::CYLINDER)
+    {
+        CreateCylinderMesh();
     }
 }
 
-PhysicsObject::PhysicsObject(ObjectType type, Vector3 position, Vector3 velocity, Color color):
-             type(type), position(position), velocity(velocity), color(color)
+PhysicsObject::PhysicsObject(ObjectType type, Vector3 position, Vector3 velocity, Color color) : type(type),
+    position(position), velocity(velocity), color(color)
 {
     SetRandomRotationAxis();
     transform = MatrixIdentity();
@@ -108,21 +130,10 @@ PhysicsObject::PhysicsObject(ObjectType type, Vector3 position, Vector3 velocity
         model = LoadModelFromMesh(GenMeshSphere(radius, 8, 8));
     if (type == ObjectType::CUBE)
         model = LoadModelFromMesh(GenMeshCube(0.2, 0.2, 0.2));
+
     if (type == ObjectType::CYLINDER)
     {
-        const float cylRadius = 0.1f;
-        const float cylHeight = 0.2f; // Note: In your constructor you used 0.1, but in ObjectManager it's 0.2. Let's use 0.2 for consistency.
-
-        // 2. Generate the standard (offset) raylib mesh
-        Mesh mesh = GenMeshCylinder(cylRadius, cylHeight, 8);
-
-        // 3. Manually translate all its vertices down by height/2
-        for (int i = 0; i < mesh.vertexCount; i++) {
-            // raylib stores vertex data as a flat float array: [x, y, z, x, y, z, ...]
-            // The y-coordinate is at index (i * 3 + 1)
-            mesh.vertices[i * 3 + 1] -= cylHeight / 2.0f;
-        }
-        model = LoadModelFromMesh(mesh);
+       CreateCylinderMesh();
     }
 }
 
@@ -137,20 +148,217 @@ void PhysicsObject::Update(const float deltaTime)
 
     Rotate();
 
-    // FIX: Update the Transform Matrix!
-    // Without this, GetTransform() returns Identity (or old data)
-    // and SAT collision detection will be incorrect.
     Matrix matTranslation = MatrixTranslate(position.x, position.y, position.z);
     transform = MatrixMultiply(rotationMatrix, matTranslation);
 
     // HandlePhysics(deltaTime);
 }
 
-void PhysicsObject::HandlePhysics(const float deltaTime) {
+
+
+void PhysicsObject::Rotate()
+{
+    const Matrix rotStep = MatrixRotate(Vector3Normalize(rotationAxis), rotationSpeed);
+    rotationMatrix = MatrixMultiply(rotStep, rotationMatrix);
+    totalRotationAngle += rotationSpeed;
+}
+
+void PhysicsObject::Draw()
+{
+    // if (this -> GetType() == ObjectType::CUBE || this -> GetType() == ObjectType::CYLINDER)
+    // {
+    //     DrawCubeWireframe(BLACK);
+    // }
+    Color renderColor = isColliding ? RED : this->color;
+
+    model.transform = this->transform;
+
+    // The model is now drawn relative to its own transform, so we use a zero vector for position.
+    DrawModelWires(model, {0.0f, 0.0f, 0.0f}, 1.0f, renderColor);
+}
+
+void PhysicsObject::DrawCubeWireframe(Color color)
+{
+
+    std::vector <Vector3> worldVertices = localVertices;
+
+    for (auto &v : worldVertices)
+        v = Vector3Transform(v, transform);
+
+    // Draw bottom face
+    DrawLine3D(worldVertices[0], worldVertices[1], color);
+    DrawLine3D(worldVertices[1], worldVertices[5], color);
+    DrawLine3D(worldVertices[5], worldVertices[4], color);
+    DrawLine3D(worldVertices[4], worldVertices[0], color);
+
+    // Draw top face
+    DrawLine3D(worldVertices[3], worldVertices[2], color);
+    DrawLine3D(worldVertices[2], worldVertices[6], color);
+    DrawLine3D(worldVertices[6], worldVertices[7], color);
+    DrawLine3D(worldVertices[7], worldVertices[3], color);
+
+    // Draw vertical edges connecting top and bottom faces
+    DrawLine3D(worldVertices[0], worldVertices[3], color);
+    DrawLine3D(worldVertices[1], worldVertices[2], color);
+    DrawLine3D(worldVertices[5], worldVertices[6], color);
+    DrawLine3D(worldVertices[4], worldVertices[7], color);
+}
+
+
+// void PhysicsObject::Draw()
+// {
+//     Color renderColor = isColliding ? RED : this->color;
+//
+//     DrawModelEx(model, this->position, this->rotationAxis, this->totalRotationAngle, {1, 1, 1}, renderColor);
+//
+//     // DrawModelEx(model, this->position, this->rotationAxis, this->rotationSpeed, {1, 1, 1}, renderColor);
+// }
+
+
+// void PhysicsObject::DrawCylinder(Color renderColor)
+// {
+//     // Transform all the local vertices into their world positions
+//     std::vector<Vector3> worldVertices(this->localVertices.size());
+//     for (size_t i = 0; i < this->localVertices.size(); i++)
+//     {
+//         worldVertices[i] = Vector3Transform(this->localVertices[i], this->transform);
+//     }
+//
+//     const size_t verticesCount = this->localVertices.size();
+//     if (verticesCount < 4) return;
+//
+//     // The number of vertices on a single cap (e.g., the base)
+//     const size_t half = verticesCount / 2;
+//
+//     // Draw the vertical lines connecting the top and bottom caps
+//     for (size_t i = 0; i < half; i++) { DrawLine3D(worldVertices[i], worldVertices[i + half], renderColor); }
+//
+//     // Draw the top and bottom cap outlines
+//     for (size_t i = 0; i < half; i++)
+//     {
+//         // Connect vertex 'i' to the next vertex on the same cap
+//         const size_t next_i = (i + 1) % half;
+//
+//         // Draw bottom cap edge
+//         DrawLine3D(worldVertices[i], worldVertices[next_i], renderColor);
+//
+//         // Draw top cap edge
+//         DrawLine3D(worldVertices[i + half], worldVertices[next_i + half], renderColor);
+//     }
+// }
+
+
+ void PhysicsObject::CreateCylinderMesh()
+    {
+        const int SIDES = 6; // Increased for a smoother look
+        const float RADIUS = CYLINDER_RADIUS;
+        const float HEIGHT = CYLINDER_HEIGHT;
+
+        // --- Vertex and Normal Generation ---
+        this->localVertices.clear();
+        std::vector<Vector3> normals;
+
+        // Generate vertices and normals for the top and bottom rings
+        for (int i = 0; i < SIDES; i++)
+        {
+            const float angle = 2.0f * PI * static_cast<float>(i) / SIDES;
+            const float x = cosf(angle) * RADIUS;
+            const float z = sinf(angle) * RADIUS;
+
+            // Bottom vertex
+            this->localVertices.push_back({x, -HEIGHT / 2.0f, z});
+            // Top vertex
+            this->localVertices.push_back({x, HEIGHT / 2.0f, z});
+
+            // Normals for the sides
+            Vector3 sideNormal = Vector3Normalize({x, 0.0f, z});
+            normals.push_back(sideNormal);
+            normals.push_back(sideNormal);
+        }
+
+        // Vertices for the centers of the caps for triangle fan
+        const int bottomCenterIndex = this->localVertices.size();
+        this->localVertices.push_back({0.0f, -HEIGHT / 2.0f, 0.0f});
+        normals.push_back({0.0f, -1.0f, 0.0f});
+
+        const int topCenterIndex = this->localVertices.size();
+        this->localVertices.push_back({0.0f, HEIGHT / 2.0f, 0.0f});
+        normals.push_back({0.0f, 1.0f, 0.0f});
+
+
+        // --- Index Generation ---
+        std::vector<unsigned short> indices;
+        for (int i = 0; i < SIDES; i++)
+        {
+            int currentBottom = i * 2;
+            int currentTop = i * 2 + 1;
+            int nextBottom = ((i + 1) % SIDES) * 2;
+            int nextTop = ((i + 1) % SIDES) * 2 + 1;
+
+            // First triangle of the side quad
+            indices.push_back(currentBottom);
+            indices.push_back(nextBottom);
+            indices.push_back(currentTop);
+
+            // Second triangle of the side quad
+            indices.push_back(currentTop);
+            indices.push_back(nextBottom);
+            indices.push_back(nextTop);
+
+            // Bottom cap triangle
+            indices.push_back(bottomCenterIndex);
+            indices.push_back(nextBottom);
+            indices.push_back(currentBottom);
+
+            // Top cap triangle
+            indices.push_back(topCenterIndex);
+            indices.push_back(currentTop);
+            indices.push_back(nextTop);
+        }
+
+        // --- Mesh Creation and Upload ---
+        Mesh mesh = {0};
+        mesh.vertexCount = this->localVertices.size();
+        mesh.triangleCount = indices.size() / 3;
+
+        // Allocate memory and copy data to the mesh
+        mesh.vertices = (float *) MemAlloc(mesh.vertexCount * 3 * sizeof(float));
+        mesh.normals = (float *) MemAlloc(mesh.vertexCount * 3 * sizeof(float));
+        mesh.indices = (unsigned short *) MemAlloc(mesh.triangleCount * 3 * sizeof(unsigned short));
+
+        // Copy vertices
+        int vertexIndex = 0;
+        for (const auto &v: this->localVertices)
+        {
+            mesh.vertices[vertexIndex++] = v.x;
+            mesh.vertices[vertexIndex++] = v.y;
+            mesh.vertices[vertexIndex++] = v.z;
+        }
+
+        // Copy normals
+        int normalIndex = 0;
+        for (const auto &n: normals)
+        {
+            mesh.normals[normalIndex++] = n.x;
+            mesh.normals[normalIndex++] = n.y;
+            mesh.normals[normalIndex++] = n.z;
+        }
+
+        // Copy indices
+        memcpy(mesh.indices, indices.data(), indices.size() * sizeof(unsigned short));
+
+        UploadMesh(&mesh, false);
+        this->model = LoadModelFromMesh(mesh);
+        this->color = PURPLE;
+}
+
+void PhysicsObject::HandlePhysics(const float deltaTime)
+{
     /// gravity
-     float limits = SPACE_LIMITS - 0.1;
+    float limits = SPACE_LIMITS - 0.1;
     float limit_offet = 0.001f;
-    if (Vector2Length(Vector2{ velocity.x, velocity.z }) < 0.001f && position.y < -limits) {
+    if (Vector2Length(Vector2{velocity.x, velocity.z}) < 0.001f && position.y < -limits)
+    {
         position.y = -limits + limit_offet;
         velocity.y = 0.0f;
         return;
@@ -163,143 +371,37 @@ void PhysicsObject::HandlePhysics(const float deltaTime) {
     velocity.z *= FRICTION_INV;
 
 
-    if (position.x > limits) {
+    if (position.x > limits)
+    {
         isColliding = true;
         position.x = limits - limit_offet;
-    }
-    else if (position.y > limits) {
-        position.y =  limits - limit_offet;
+    } else if (position.y > limits)
+    {
+        position.y = limits - limit_offet;
         isColliding = true;
-    }
-    else if (position.z > limits) {
+    } else if (position.z > limits)
+    {
         position.z = limits - limit_offet;
         isColliding = true;
-    }
-    else if (position.x < -limits) {
+    } else if (position.x < -limits)
+    {
         position.x = -limits + limit_offet;
         isColliding = true;
-    }
-    else if (position.y < -limits) {
+    } else if (position.y < -limits)
+    {
         position.y = -limits + limit_offet;
         isColliding = true;
-    }
-    else if (position.z < -limits) {
+    } else if (position.z < -limits)
+    {
         position.z = -limits + limit_offet;
         isColliding = true;
     }
 
-    if (isColliding) {
+    if (isColliding)
+    {
         isColliding = false;
         velocity.x = -velocity.x * ENERGY_LOSS;
         velocity.y = -velocity.y * ENERGY_LOSS;
         velocity.z = -velocity.z * ENERGY_LOSS;
     }
 }
-
-void PhysicsObject::Rotate()
-{
-    // const Matrix rotStep = MatrixRotate(Vector3Normalize(rotationAxis), rotationSpeed);
-    // rotationMatrix = MatrixMultiply(rotStep, rotationMatrix);
-
-    const Matrix rotStep = MatrixRotate(Vector3Normalize(rotationAxis), rotationSpeed);
-    rotationMatrix = MatrixMultiply(rotStep, rotationMatrix);
-    totalRotationAngle += rotationSpeed;
-}
-
-
-// void PhysicsObject::Draw()
-// {
-//     if (this -> GetType() == ObjectType::SPHERE)
-//     {
-//         DrawSphere();
-//         return;
-//     }
-//     Rotate();
-//     transform = MatrixMultiply(this->rotationMatrix,
-//                                MatrixTranslate(this->position.x, this->position.y, this->position.z));
-//
-//     std::vector<Vector3> worldVertices(this->localVertices.size());
-//     for (size_t i = 0; i < this->localVertices.size(); i++)
-//         worldVertices[i] = Vector3Transform(this->localVertices[i], transform);
-//
-//     const size_t verticesCount = this->localVertices.size();
-//
-//     if (verticesCount < 4)
-//         return;
-//
-//     const size_t half = verticesCount / 2;
-//
-//     if (isColliding)
-//         color = RED;
-//     else
-//         color = GREEN;
-//
-//     for (int i = 0; i < half; i++)
-//             DrawLine3D(worldVertices[i], worldVertices[i + half], this->color);
-//
-//     for (int i = 0; i < half; i++)
-//     {
-//         const size_t next = (i + 1) % half;
-//         DrawLine3D(worldVertices[i], worldVertices[next], this->color);
-//         DrawLine3D(worldVertices[i + half], worldVertices[next + half], this->color);
-//     }
-// }
-
-
-void PhysicsObject::Draw()
-{
-
-    Color renderColor = isColliding ? RED : this->color;
-
-    if (this->GetType() == ObjectType::CYLINDER)
-    {
-        DrawCylinder(renderColor);
-        return;
-    }
-
-    DrawModelEx(
-        model,
-        position,
-        Vector3Normalize(rotationAxis),
-        totalRotationAngle * RAD2DEG,  // Convert total rotation from radians to degrees
-        {1.0f, 1.0f, 1.0f},            // We use a uniform scale of 1, as size is handled by the mesh generation.
-        renderColor
-    );
-}
-
-
-void PhysicsObject::DrawCylinder(Color renderColor)
-{
-    // Transform all the local vertices into their world positions
-    std::vector<Vector3> worldVertices(this->localVertices.size());
-    for (size_t i = 0; i < this->localVertices.size(); i++)
-    {
-        worldVertices[i] = Vector3Transform(this->localVertices[i], this->transform);
-    }
-
-    const size_t verticesCount = this->localVertices.size();
-    if (verticesCount < 4) return;
-
-    // The number of vertices on a single cap (e.g., the base)
-    const size_t half = verticesCount / 2;
-
-    // Draw the vertical lines connecting the top and bottom caps
-    for (size_t i = 0; i < half; i++)
-    {
-        DrawLine3D(worldVertices[i], worldVertices[i + half], renderColor);
-    }
-
-    // Draw the top and bottom cap outlines
-    for (size_t i = 0; i < half; i++)
-    {
-        // Connect vertex 'i' to the next vertex on the same cap
-        const size_t next_i = (i + 1) % half;
-
-        // Draw bottom cap edge
-        DrawLine3D(worldVertices[i], worldVertices[next_i], renderColor);
-
-        // Draw top cap edge
-        DrawLine3D(worldVertices[i + half], worldVertices[next_i + half], renderColor);
-    }
-}
-

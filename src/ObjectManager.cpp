@@ -16,43 +16,22 @@
 ObjectManager::ObjectManager(const Vector3 boxCenter, const float boxSize)
     : boxSize(boxSize), boxCenter(boxCenter)
 {
-    cubeVertices = {
-        {-CUBE_HALF_LEN, -CUBE_HALF_LEN, -CUBE_HALF_LEN},
-        {CUBE_HALF_LEN, -CUBE_HALF_LEN, -CUBE_HALF_LEN},
-        {CUBE_HALF_LEN, CUBE_HALF_LEN, -CUBE_HALF_LEN},
-        {-CUBE_HALF_LEN, CUBE_HALF_LEN, -CUBE_HALF_LEN},
-        {-CUBE_HALF_LEN, -CUBE_HALF_LEN, CUBE_HALF_LEN},
-        {CUBE_HALF_LEN, -CUBE_HALF_LEN, CUBE_HALF_LEN},
-        {CUBE_HALF_LEN, CUBE_HALF_LEN, CUBE_HALF_LEN},
-        {-CUBE_HALF_LEN, CUBE_HALF_LEN, CUBE_HALF_LEN}
-    };
 
-    for (int i = 0; i < CYLINDER_SIDES; i++)
-    {
-        const float a = (2.0f * PI / CYLINDER_SIDES) * static_cast<float> (i);
-        const auto x = static_cast<float>(cosf(a) * CYLINDER_RADIUS);
 
-        const auto z = static_cast<float>(sinf(a) * CYLINDER_RADIUS);
+    // for (int i = 0; i < CYLINDER_SIDES; i++)
+    // {
+    //     const float a = (2.0f * PI / CYLINDER_SIDES) * static_cast<float> (i);
+    //     const auto x = static_cast<float>(cosf(a) * CYLINDER_RADIUS);
+    //
+    //     const auto z = static_cast<float>(sinf(a) * CYLINDER_RADIUS);
+    //
+    //     cylinderVertices.push_back({x, -CYLINDER_HEIGHT / 2, z});
+    //     cylinderVertices.push_back({x, CYLINDER_HEIGHT / 2, z});
+    // }
 
-        cylinderVertices.push_back({x, -CYLINDER_HEIGHT / 2, z});
-        cylinderVertices.push_back({x, CYLINDER_HEIGHT / 2, z});
-    }
-
-    for (int i = 0; i <= CIRCLE_RINGS; i++)
-    {
-        const auto phi = static_cast<float>((PI *  static_cast<float>(i)) / CIRCLE_RINGS); // latitude angle
-        const float y = cosf(phi) * SPHERE_RADIUS;
-        const float r = sinf(phi) * SPHERE_RADIUS;
-
-        for (int j = 0; j <= CIRCLE_RINGS; j++)
-        {
-            const double theta = 2.0f * PI * static_cast<float>(j) / CIRCLE_RINGS; // longitude angle
-            const float x = r * cosf(static_cast<float>(theta));
-            const float z = r * sinf(static_cast<float>(theta));
-
-            sphereVertices.push_back({ x, y, z });
-        }
-    }
+    CreateCubeVertices();
+    CreateSphereVertices();
+    CreateCylinderVertices();
 }
 
 void ObjectManager::SpawnRandomObject()
@@ -68,7 +47,6 @@ void ObjectManager::SpawnObject(ObjectType objectType) {
     Vector3 velocity = GetRandomVelocity();
     Color color = GetRandomColor();
 
-
     objects.emplace_back(type, position, velocity, color);
     setLocalVertices(objects.back());
 }
@@ -82,8 +60,10 @@ void ObjectManager::SpawnPrimitives()
     objects.emplace_back(ObjectType::CYLINDER);
     objects.emplace_back(ObjectType::CYLINDER);
 
+
     objects.emplace_back(ObjectType::CUBE);
     objects.emplace_back(ObjectType::CYLINDER);
+
 
     objects.emplace_back(ObjectType::SPHERE);
     objects.emplace_back(ObjectType::SPHERE);
@@ -114,8 +94,11 @@ void ObjectManager::setLocalVertices(PhysicsObject &object) const
 {
     if (object.GetType() == ObjectType::CUBE)
         object.SetLocalVertices(cubeVertices);
+
     if (object.GetType() == ObjectType::CYLINDER)
+    {
         object.SetLocalVertices(cylinderVertices);
+    }
     if (object.GetType() == ObjectType::SPHERE)
         object.SetLocalVertices(sphereVertices);
 }
@@ -150,7 +133,7 @@ void ObjectManager::Update(float deltaTime, bool debug) {
 
 void ObjectManager::HandleMoveDebugObjects() {
     if (IsKeyPressed(KEY_FOUR)) {
-        Vector3 newVelocity = {1.0f, 0.0f, 0.0f};
+        Vector3 newVelocity = {.5f, 0.0f, 0.0f};
         for (int i = 1; i < GetObjectCount(); i+=2)
         {
             objects.at(i).SetVelocity(newVelocity);
@@ -164,7 +147,7 @@ void ObjectManager::HandleMoveDebugObjects() {
     }
 
     if (IsKeyPressed(KEY_SIX)) {
-        Vector3 newVelocity = {-1.0f, 0.0f, 0.0f};
+        Vector3 newVelocity = {-.5f, 0.0f, 0.0f};
         for (int i = 1; i < GetObjectCount(); i+=2)
         {
             objects.at(i).SetVelocity(newVelocity);
@@ -250,4 +233,143 @@ void ObjectManager::ResetAllCollisions()
 {
     for (auto &object: objects)
         object.SetIsColliding(false);
+}
+
+void ObjectManager::CreateCubeVertices()
+{
+    cubeVertices = {
+        {-CUBE_HALF_LEN, -CUBE_HALF_LEN, -CUBE_HALF_LEN},
+        {CUBE_HALF_LEN, -CUBE_HALF_LEN, -CUBE_HALF_LEN},
+        {CUBE_HALF_LEN, CUBE_HALF_LEN, -CUBE_HALF_LEN},
+        {-CUBE_HALF_LEN, CUBE_HALF_LEN, -CUBE_HALF_LEN},
+        {-CUBE_HALF_LEN, -CUBE_HALF_LEN, CUBE_HALF_LEN},
+        {CUBE_HALF_LEN, -CUBE_HALF_LEN, CUBE_HALF_LEN},
+        {CUBE_HALF_LEN, CUBE_HALF_LEN, CUBE_HALF_LEN},
+        {-CUBE_HALF_LEN, CUBE_HALF_LEN, CUBE_HALF_LEN}
+    };
+}
+
+
+void ObjectManager::CreateSphereVertices()
+{
+    for (int i = 0; i <= CIRCLE_RINGS; i++)
+    {
+        const auto phi = static_cast<float>((PI *  static_cast<float>(i)) / CIRCLE_RINGS); // latitude angle
+        const float y = cosf(phi) * SPHERE_RADIUS;
+        const float r = sinf(phi) * SPHERE_RADIUS;
+
+        for (int j = 0; j <= CIRCLE_RINGS; j++)
+        {
+            const double theta = 2.0f * PI * static_cast<float>(j) / CIRCLE_RINGS; // longitude angle
+            const float x = r * cosf(static_cast<float>(theta));
+            const float z = r * sinf(static_cast<float>(theta));
+
+            sphereVertices.push_back({ x, y, z });
+        }
+    }
+}
+
+
+void ObjectManager::CreateCylinderVertices()
+    {
+        const int SIDES = 6; // Increased for a smoother look
+        const float RADIUS = CYLINDER_RADIUS;
+        const float HEIGHT = CYLINDER_HEIGHT;
+
+        // --- Vertex and Normal Generation ---
+        cylinderVertices.clear();
+        std::vector<Vector3> normals;
+
+        // Generate vertices and normals for the top and bottom rings
+        for (int i = 0; i < SIDES; i++)
+        {
+            const float angle = 2.0f * PI * static_cast<float>(i) / SIDES;
+            const float x = cosf(angle) * RADIUS;
+            const float z = sinf(angle) * RADIUS;
+
+            // Bottom vertex
+            cylinderVertices.push_back({x, -HEIGHT / 2.0f, z});
+            // Top vertex
+            cylinderVertices.push_back({x, HEIGHT / 2.0f, z});
+
+            // Normals for the sides
+            Vector3 sideNormal = Vector3Normalize({x, 0.0f, z});
+            normals.push_back(sideNormal);
+            normals.push_back(sideNormal);
+        }
+
+        // Vertices for the centers of the caps for triangle fan
+        const int bottomCenterIndex = this->cylinderVertices.size();
+        cylinderVertices.push_back({0.0f, -HEIGHT / 2.0f, 0.0f});
+        normals.push_back({0.0f, -1.0f, 0.0f});
+
+        const int topCenterIndex = cylinderVertices.size();
+        cylinderVertices.push_back({0.0f, HEIGHT / 2.0f, 0.0f});
+        normals.push_back({0.0f, 1.0f, 0.0f});
+
+    // // mesh generator
+    //     // --- Index Generation ---
+    //     std::vector<unsigned short> indices;
+    //     for (int i = 0; i < SIDES; i++)
+    //     {
+    //         int currentBottom = i * 2;
+    //         int currentTop = i * 2 + 1;
+    //         int nextBottom = ((i + 1) % SIDES) * 2;
+    //         int nextTop = ((i + 1) % SIDES) * 2 + 1;
+    //
+    //         // First triangle of the side quad
+    //         indices.push_back(currentBottom);
+    //         indices.push_back(nextBottom);
+    //         indices.push_back(currentTop);
+    //
+    //         // Second triangle of the side quad
+    //         indices.push_back(currentTop);
+    //         indices.push_back(nextBottom);
+    //         indices.push_back(nextTop);
+    //
+    //         // Bottom cap triangle
+    //         indices.push_back(bottomCenterIndex);
+    //         indices.push_back(nextBottom);
+    //         indices.push_back(currentBottom);
+    //
+    //         // Top cap triangle
+    //         indices.push_back(topCenterIndex);
+    //         indices.push_back(currentTop);
+    //         indices.push_back(nextTop);
+    //     }
+    //
+    //     // --- Mesh Creation and Upload ---
+    //     Mesh mesh = {0};
+    //     mesh.vertexCount = cylinderVertices.size();
+    //     mesh.triangleCount = indices.size() / 3;
+    //
+    //     // Allocate memory and copy data to the mesh
+    //     mesh.vertices = (float *) MemAlloc(mesh.vertexCount * 3 * sizeof(float));
+    //     mesh.normals = (float *) MemAlloc(mesh.vertexCount * 3 * sizeof(float));
+    //     mesh.indices = (unsigned short *) MemAlloc(mesh.triangleCount * 3 * sizeof(unsigned short));
+    //
+    //     // Copy vertices
+    //     int vertexIndex = 0;
+    //     for (const auto &v: cylinderVertices)
+    //     {
+    //         mesh.vertices[vertexIndex++] = v.x;
+    //         mesh.vertices[vertexIndex++] = v.y;
+    //         mesh.vertices[vertexIndex++] = v.z;
+    //     }
+    //
+    //     // Copy normals
+    //     int normalIndex = 0;
+    //     for (const auto &n: normals)
+    //     {
+    //         mesh.normals[normalIndex++] = n.x;
+    //         mesh.normals[normalIndex++] = n.y;
+    //         mesh.normals[normalIndex++] = n.z;
+    //     }
+
+        // // Copy indices
+        // memcpy(mesh.indices, indices.data(), indices.size() * sizeof(unsigned short));
+        //
+        // UploadMesh(&mesh, false);
+        // this->model = LoadModelFromMesh(mesh);
+        // this->color = PURPLE;
 }
