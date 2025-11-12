@@ -10,12 +10,6 @@
 #include "CollisionDetector.h"
 #define MAX_SPEED 10
 
-enum class LocalVerticesType
-{
-    SPHERE,
-    CUBE,
-    CYLINDER
-};
 
 class ObjectManager {
 private:

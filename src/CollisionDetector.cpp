@@ -49,13 +49,6 @@ std::vector<Vector3> CollisionDetector::GetFaceNormals(const std::vector<Vector3
     return normals;
 }
 
-// bool CollisionDetector::CheckSphereSphere(const PhysicsObject &a, const PhysicsObject &b)
-// {
-//     float distance = Vector3Distance(a.GetPosition(), b.GetPosition());
-//     float radiusSum = a.GetSize() + b.GetSize();
-//
-//     return distance < radiusSum;
-// }
 
 ///TODO: CHECK THIS
 bool CollisionDetector::CheckSphereConvex(PhysicsObject &sphere, PhysicsObject &convex)
@@ -68,8 +61,6 @@ bool CollisionDetector::CheckSphereConvex(PhysicsObject &sphere, PhysicsObject &
     for (auto &v : convex.GetLocalVertices())
         worldVertices.push_back(Vector3Transform(v, convex.GetTransform()));
 
-    // For each face of the convex shape, check if sphere is too far outside
-    // We need to properly construct faces based on shape type
 
     if (convex.GetType() == ObjectType::CUBE)
     {
@@ -89,13 +80,8 @@ bool CollisionDetector::CheckSphereCube(PhysicsObject &sphere, const std::vector
     Vector3 sphereCenter = sphere.GetPosition();
     float radius = sphere.GetRadius();
 
-    // Find the AABB (axis-aligned bounding box) of the cube in world space
-    // But since the cube is rotated, we need to find the closest point on the oriented box
-
-    // For a cube with 8 vertices, find the closest point by clamping to each face
     float minDistSq = FLT_MAX;
 
-    // Define the 6 faces of the cube (each face has 4 vertices)
     int faces[6][4] = {
         {0, 1, 2, 3}, // back face
         {4, 5, 6, 7}, // front face
@@ -105,7 +91,6 @@ bool CollisionDetector::CheckSphereCube(PhysicsObject &sphere, const std::vector
         {1, 2, 6, 5}  // right face
     };
 
-    // Check each face
     for (auto & face : faces)
     {
         // Get 3 points to define the plane
@@ -113,19 +98,14 @@ bool CollisionDetector::CheckSphereCube(PhysicsObject &sphere, const std::vector
         Vector3 p1 = cubeVertices[face[1]];
         Vector3 p2 = cubeVertices[face[2]];
 
-        // Calculate face normal
         Vector3 edge1 = Vector3Subtract(p1, p0);
         Vector3 edge2 = Vector3Subtract(p2, p0);
         Vector3 normal = Vector3Normalize(Vector3CrossProduct(edge1, edge2));
 
-        // Distance from sphere center to plane
         float distToPlane = Vector3DotProduct(Vector3Subtract(sphereCenter, p0), normal);
 
-        // Project sphere center onto the plane
         Vector3 pointOnPlane = Vector3Subtract(sphereCenter, Vector3Scale(normal, distToPlane));
 
-        // Check if the projected point is inside the face rectangle
-        // We'll use a simpler approach: check if point is on the correct side of all edges
         bool insideFace = true;
 
         for (int i = 0; i < 4; i++)
@@ -147,15 +127,12 @@ bool CollisionDetector::CheckSphereCube(PhysicsObject &sphere, const std::vector
 
         if (insideFace)
         {
-            // Closest point is on the face
             float distSq = distToPlane * distToPlane;
             if (distSq < minDistSq)
                 minDistSq = distSq;
         }
         else
         {
-            // Closest point might be on an edge or vertex of this face
-            // Check all edges of this face
             for (int i = 0; i < 4; i++)
             {
                 Vector3 edgeStart = cubeVertices[face[i]];
@@ -177,36 +154,26 @@ bool CollisionDetector::CheckSphereCylinder(PhysicsObject &sphere, const std::ve
     float radius = sphere.GetRadius();
     float minDistSq = FLT_MAX;
 
-    // Cylinder vertices are organized as pairs: bottom ring, then top ring
-    // vertices[0], vertices[1] = first bottom, first top
-    // vertices[2], vertices[3] = second bottom, second top, etc.
 
     int sides = cylinderVertices.size() / 2;
 
-    // 1. Check distance to side faces (rectangles between bottom and top)
     for (int i = 0; i < sides; i++)
     {
         int next = (i + 1) % sides;
 
-        // Four vertices of this rectangular face
         Vector3 bottomLeft = cylinderVertices[i * 2];
         Vector3 topLeft = cylinderVertices[i * 2 + 1];
         Vector3 bottomRight = cylinderVertices[next * 2];
         Vector3 topRight = cylinderVertices[next * 2 + 1];
 
-        // Calculate face normal (pointing outward)
         Vector3 edge1 = Vector3Subtract(topLeft, bottomLeft);
         Vector3 edge2 = Vector3Subtract(bottomRight, bottomLeft);
         Vector3 normal = Vector3Normalize(Vector3CrossProduct(edge1, edge2));
 
-        // Distance from sphere center to plane
         float distToPlane = Vector3DotProduct(Vector3Subtract(sphereCenter, bottomLeft), normal);
 
-        // Project sphere center onto the plane
         Vector3 pointOnPlane = Vector3Subtract(sphereCenter, Vector3Scale(normal, distToPlane));
 
-        // Check if projected point is inside the rectangular face
-        // Simple approach: check if it's between the edges
         Vector3 toBL = Vector3Subtract(pointOnPlane, bottomLeft);
         Vector3 edgeBottom = Vector3Subtract(bottomRight, bottomLeft);
         Vector3 edgeLeft = Vector3Subtract(topLeft, bottomLeft);
@@ -228,7 +195,6 @@ bool CollisionDetector::CheckSphereCylinder(PhysicsObject &sphere, const std::ve
         }
         else
         {
-            // Check edges of this face
             float d1 = ClosestPointOnEdge(sphereCenter, bottomLeft, bottomRight);
             float d2 = ClosestPointOnEdge(sphereCenter, topLeft, topRight);
             float d3 = ClosestPointOnEdge(sphereCenter, bottomLeft, topLeft);
@@ -238,8 +204,6 @@ bool CollisionDetector::CheckSphereCylinder(PhysicsObject &sphere, const std::ve
         }
     }
 
-    // 2. Check distance to top and bottom caps (circular faces)
-    // Bottom cap
     {
         Vector3 bottomCenter = {0, 0, 0};
         int count = 0;
@@ -267,7 +231,6 @@ bool CollisionDetector::CheckSphereCylinder(PhysicsObject &sphere, const std::ve
         }
         else
         {
-            // Check edges of bottom cap
             for (int i = 0; i < sides; i++)
             {
                 int next = (i + 1) % sides;
@@ -278,7 +241,6 @@ bool CollisionDetector::CheckSphereCylinder(PhysicsObject &sphere, const std::ve
         }
     }
 
-    // Top cap (similar to bottom)
     {
         Vector3 topCenter = {0, 0, 0};
         int count = 0;
@@ -317,7 +279,6 @@ bool CollisionDetector::CheckSphereCylinder(PhysicsObject &sphere, const std::ve
     return minDistSq <= (radius * radius);
 }
 
-// Helper function to find closest point on an edge
 float CollisionDetector::ClosestPointOnEdge(const Vector3 &point, const Vector3 &edgeStart, const Vector3 &edgeEnd)
 {
     Vector3 edge = Vector3Subtract(edgeEnd, edgeStart);
@@ -331,7 +292,6 @@ float CollisionDetector::ClosestPointOnEdge(const Vector3 &point, const Vector3 
         return Vector3DotProduct(diff, diff);
     }
 
-    // Project point onto edge, clamped to [0, 1]
     float t = Vector3DotProduct(toPoint, edge) / edgeLengthSq;
     t = fmaxf(0.0f, fminf(1.0f, t));
 

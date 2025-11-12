@@ -16,19 +16,6 @@
 ObjectManager::ObjectManager(const Vector3 boxCenter, const float boxSize)
     : boxSize(boxSize), boxCenter(boxCenter)
 {
-
-
-    // for (int i = 0; i < CYLINDER_SIDES; i++)
-    // {
-    //     const float a = (2.0f * PI / CYLINDER_SIDES) * static_cast<float> (i);
-    //     const auto x = static_cast<float>(cosf(a) * CYLINDER_RADIUS);
-    //
-    //     const auto z = static_cast<float>(sinf(a) * CYLINDER_RADIUS);
-    //
-    //     cylinderVertices.push_back({x, -CYLINDER_HEIGHT / 2, z});
-    //     cylinderVertices.push_back({x, CYLINDER_HEIGHT / 2, z});
-    // }
-
     CreateCubeVertices();
     CreateSphereVertices();
     CreateCylinderVertices();
@@ -60,10 +47,8 @@ void ObjectManager::SpawnPrimitives()
     objects.emplace_back(ObjectType::CYLINDER);
     objects.emplace_back(ObjectType::CYLINDER);
 
-
     objects.emplace_back(ObjectType::CUBE);
     objects.emplace_back(ObjectType::CYLINDER);
-
 
     objects.emplace_back(ObjectType::SPHERE);
     objects.emplace_back(ObjectType::SPHERE);
@@ -307,69 +292,5 @@ void ObjectManager::CreateCylinderVertices()
         cylinderVertices.push_back({0.0f, HEIGHT / 2.0f, 0.0f});
         normals.push_back({0.0f, 1.0f, 0.0f});
 
-    // // mesh generator
-    //     // --- Index Generation ---
-    //     std::vector<unsigned short> indices;
-    //     for (int i = 0; i < SIDES; i++)
-    //     {
-    //         int currentBottom = i * 2;
-    //         int currentTop = i * 2 + 1;
-    //         int nextBottom = ((i + 1) % SIDES) * 2;
-    //         int nextTop = ((i + 1) % SIDES) * 2 + 1;
-    //
-    //         // First triangle of the side quad
-    //         indices.push_back(currentBottom);
-    //         indices.push_back(nextBottom);
-    //         indices.push_back(currentTop);
-    //
-    //         // Second triangle of the side quad
-    //         indices.push_back(currentTop);
-    //         indices.push_back(nextBottom);
-    //         indices.push_back(nextTop);
-    //
-    //         // Bottom cap triangle
-    //         indices.push_back(bottomCenterIndex);
-    //         indices.push_back(nextBottom);
-    //         indices.push_back(currentBottom);
-    //
-    //         // Top cap triangle
-    //         indices.push_back(topCenterIndex);
-    //         indices.push_back(currentTop);
-    //         indices.push_back(nextTop);
-    //     }
-    //
-    //     // --- Mesh Creation and Upload ---
-    //     Mesh mesh = {0};
-    //     mesh.vertexCount = cylinderVertices.size();
-    //     mesh.triangleCount = indices.size() / 3;
-    //
-    //     // Allocate memory and copy data to the mesh
-    //     mesh.vertices = (float *) MemAlloc(mesh.vertexCount * 3 * sizeof(float));
-    //     mesh.normals = (float *) MemAlloc(mesh.vertexCount * 3 * sizeof(float));
-    //     mesh.indices = (unsigned short *) MemAlloc(mesh.triangleCount * 3 * sizeof(unsigned short));
-    //
-    //     // Copy vertices
-    //     int vertexIndex = 0;
-    //     for (const auto &v: cylinderVertices)
-    //     {
-    //         mesh.vertices[vertexIndex++] = v.x;
-    //         mesh.vertices[vertexIndex++] = v.y;
-    //         mesh.vertices[vertexIndex++] = v.z;
-    //     }
-    //
-    //     // Copy normals
-    //     int normalIndex = 0;
-    //     for (const auto &n: normals)
-    //     {
-    //         mesh.normals[normalIndex++] = n.x;
-    //         mesh.normals[normalIndex++] = n.y;
-    //         mesh.normals[normalIndex++] = n.z;
-    //     }
 
-        // // Copy indices
-        // memcpy(mesh.indices, indices.data(), indices.size() * sizeof(unsigned short));
-        //
-        // UploadMesh(&mesh, false);
-        // this->model = LoadModelFromMesh(mesh);
-        // this->color = PURPLE;
 }
