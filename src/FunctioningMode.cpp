@@ -4,7 +4,12 @@
 
 #include "FunctioningMode.h"
 
-void FunctioningMode::SwitchMode() {
+void FunctioningMode::SwitchMode(bool debug){
+    if (debug) {
+        mode = FMode::DEBUG_MODE;
+        return;
+    }
+
     if (mode == FMode::USER_MODE) {
         mode = FMode::GEN_MODE;
     } else {
@@ -14,6 +19,9 @@ void FunctioningMode::SwitchMode() {
 
 void FunctioningMode::Update()
 {
+    if (IsKeyPressed(KEY_T)) {
+        SwitchMode(true);
+    }
     if (IsKeyPressed(KEY_M)) {
         SwitchMode();
     }

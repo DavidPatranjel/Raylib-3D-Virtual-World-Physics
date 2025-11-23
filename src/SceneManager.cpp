@@ -3,7 +3,6 @@
 //
 
 #include "SceneManager.h"
-
 #include <iostream>
 
 SceneManager::SceneManager() : objectManager(boxPosition, boxSize) {
@@ -14,11 +13,25 @@ void SceneManager::DrawSceneCube() const {
     DrawCubeWires(boxPosition, boxSize, boxSize, boxSize, RED);
 }
 
+int SceneManager::GetObjectCount() {
+    return objectManager.GetObjectCount();
+}
 
 void SceneManager::Update() {
+    if (IsKeyReleased(KEY_O) && functioningMode.GetMode() == FMode::USER_MODE)
+        objectManager.SpawnRandomObject();
+
+    if (IsKeyReleased(KEY_SPACE) && functioningMode.GetMode() == FMode::USER_MODE)
+        for (auto &object : objectManager.objects) {
+            Vector3 velocity = objectManager.GetRandomVelocity();
+            object.SetVelocity(velocity);
+        }
+
     functioningMode.Update();
     VerifyModeModif();
-    objectManager.Update(GetFrameTime());
+
+    const bool debug = functioningMode.GetMode() == FMode::DEBUG_MODE;
+    objectManager.Update(GetFrameTime(), debug);
 }
 
 void SceneManager::Draw() {
@@ -29,6 +42,7 @@ void SceneManager::Draw() {
 UIData SceneManager::GetUIData() const {
     return UIData{
         objectManager.GetObjectCount(),
+        objectManager.physics_time,
         functioningMode.GetMode(),
         functioningMode.GetGenMode()
     };
@@ -41,14 +55,22 @@ void SceneManager::VerifyModeModif() {
         if (modes.mode == FMode::GEN_MODE) {
             GenerateObjects(modes.genMode);
         }
-        else {
+        else if (modes.mode == FMode::USER_MODE){
             objectManager.Clear();
             std::cout << "Switched to user mode" << std::endl;
+        }
+        else if (modes.mode == FMode::DEBUG_MODE){
+            GenerateDebugObjects();
+            std::cout << "Switched to debug mode" << std::endl;
         }
         oldMode = modes;
     }
 }
 
+void SceneManager::GenerateDebugObjects() {
+    objectManager.Clear();
+    objectManager.SpawnPrimitives();
+}
 
 void SceneManager::GenerateObjects(GenMode genMode) {
     objectManager.Clear();

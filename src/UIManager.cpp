@@ -14,14 +14,23 @@ void UIManager::DrawGameUI(UIData uiData, bool isFreeMode) {
     DrawText(TextFormat("FPS: %d", fps), padding, y, fontSize, textColor);
     y += lineHeight;
 
+    DrawText(TextFormat("Time (ms): %d", uiData.time), padding, y, fontSize, textColor);
+    y += lineHeight;
+
     DrawText(TextFormat("Objects: %d", uiData.objectCount), padding, y, fontSize, textColor);
     y += lineHeight;
 
 
     if (uiData.mode == FMode::USER_MODE) {
-        DrawText("M - Toggle mode", padding, y, fontSize, textColor);
+        DrawText("M/T* - Toggle mode", padding, y, fontSize, textColor);
         y += lineHeight;
         DrawText(TextFormat("Mode: USER"), padding, y, fontSize, MAGENTA);
+        y += lineHeight;
+    }
+    else if (uiData.mode == FMode::DEBUG_MODE) {
+        DrawText("M - To user mode", padding, y, fontSize, textColor);
+        y += lineHeight;
+        DrawText(TextFormat("Mode: DEBUG"), padding, y, fontSize, BLUE);
         y += lineHeight;
     }
     else
@@ -36,6 +45,10 @@ void UIManager::DrawGameUI(UIData uiData, bool isFreeMode) {
                 break;
             case GenMode::GEN3:
                 functionMode = "GENERATING 3";
+                break;
+            default:
+                functionMode = "GENERATING ERR_MODE";
+                break;
 
         }
 

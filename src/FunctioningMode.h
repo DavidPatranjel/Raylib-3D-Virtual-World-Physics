@@ -8,7 +8,8 @@
 
 enum class FMode{
     USER_MODE,
-    GEN_MODE
+    GEN_MODE,
+    DEBUG_MODE
 };
 
 enum class GenMode{
@@ -25,11 +26,11 @@ struct AllModes {
 
 class FunctioningMode {
 private:
-    FMode mode = FMode::USER_MODE;
+    FMode mode = FMode::GEN_MODE;
     GenMode genMode = GenMode::GEN1;
 
 public:
-    void SwitchMode();
+    void SwitchMode(bool debug = false);
     FMode GetMode() const { return mode;}
     GenMode GetGenMode() const { return genMode;}
     AllModes GetAllModes() const;
