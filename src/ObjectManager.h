@@ -8,7 +8,8 @@
 #include <vector>
 #include "PhysicsObject.h"
 #include "CollisionDetector.h"
-#define MAX_SPEED 10
+#include "GPUPhysicsManager.h"
+#define MAX_SPEED 8000
 
 
 class ObjectManager {
@@ -25,7 +26,8 @@ private:
     std::vector<Vector3> sphereVertices;
     std::vector<Vector3> cylinderVertices;
 
-
+    GPUPhysicsManager gpuPhysics;
+    bool useGPU;
     void CreateCylinderVertices();
     void CreateSphereVertices();
     void CreateCubeVertices();
@@ -47,8 +49,8 @@ public:
     void CheckCollisions();
     void ResetAllCollisions();
     void setLocalVertices(PhysicsObject &object) const;
-
-    // std::vector <Vector3> getLocalVertices(ObjectType objectType);
+    void SetUseGPU(bool enabled);
+    bool IsUsingGPU() const { return useGPU; }
 
 };
 

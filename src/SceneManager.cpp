@@ -27,6 +27,10 @@ void SceneManager::Update() {
             object.SetVelocity(velocity);
         }
 
+    if (IsKeyPressed(KEY_G)) {
+        objectManager.SetUseGPU(!objectManager.IsUsingGPU());
+    }
+
     functioningMode.Update();
     VerifyModeModif();
 
@@ -44,7 +48,8 @@ UIData SceneManager::GetUIData() const {
         objectManager.GetObjectCount(),
         objectManager.physics_time,
         functioningMode.GetMode(),
-        functioningMode.GetGenMode()
+        functioningMode.GetGenMode(),
+        objectManager.IsUsingGPU()
     };
 }
 

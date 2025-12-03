@@ -282,3 +282,7 @@ void PhysicsObject::HandlePhysics(const float deltaTime)
         velocity.z = -velocity.z * ENERGY_LOSS;
     }
 }
+
+void PhysicsObject::SetTransform(Matrix inputTransform) {
+    this->transform = inputTransform;
+}

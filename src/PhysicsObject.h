@@ -4,10 +4,10 @@
 
 #ifndef INC_3DVIRTUALWORLDPHYSICS_PHYSICSOBJECT_H
 #define INC_3DVIRTUALWORLDPHYSICS_PHYSICSOBJECT_H
-#define GRAVITY 1.0f
-#define FRICTION_INV 0.97f
+#define GRAVITY 9.8f
+#define FRICTION_INV 0.98f
 #define SPACE_LIMITS 3
-#define ENERGY_LOSS 0.85f
+#define ENERGY_LOSS 0.9f
 
 #include "raylib.h"
 #include "raymath.h"
@@ -92,7 +92,7 @@ public:
 
     void DrawCubeWireframe(Color color);
 
-
+    void SetTransform(Matrix inputTransform);
 };
 
 #endif //INC_3DVIRTUALWORLDPHYSICS_PHYSICSOBJECT_H

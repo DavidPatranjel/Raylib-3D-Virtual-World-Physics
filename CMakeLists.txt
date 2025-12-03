@@ -34,6 +34,8 @@ add_executable(mmo-virtual-world
         src/FunctioningMode.h
         src/CollisionDetector.cpp
         src/CollisionDetector.h
+        src/GPUPhysicsManager.cpp
+        src/GPUPhysicsManager.h
 )
 
 # Link Raylib
@@ -46,3 +48,4 @@ endif()
 
 # Copy resources to build directory (add this when you have assets)
 # file(COPY ${CMAKE_SOURCE_DIR}/resources DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY ${CMAKE_SOURCE_DIR}/shaders DESTINATION ${CMAKE_BINARY_DIR})

@@ -15,7 +15,7 @@ private:
     static constexpr int lineHeight = 30;
     static constexpr Color textColor = WHITE;
     static constexpr Color backgroundColor = {0, 0, 0, 150};
-    static constexpr int nrUIElements = 7;
+    static constexpr int nrUIElements = 8;
 
 public:
     static void DrawGameUI(UIData uiData, bool isFreeMode);

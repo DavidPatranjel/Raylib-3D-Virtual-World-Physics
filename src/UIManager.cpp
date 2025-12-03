@@ -70,4 +70,10 @@ void UIManager::DrawGameUI(UIData uiData, bool isFreeMode) {
     const char* cameraMode = isFreeMode ? "FREE" : "STATIC";
     Color cameraModeColor = isFreeMode ? GREEN : ORANGE;
     DrawText(TextFormat("Camera: %s", cameraMode), padding, y, fontSize, cameraModeColor);
+    y += lineHeight;
+
+    const char* processingMode = uiData.useGPU ? "GPU" : "CPU";
+    DrawText(TextFormat("G - Processing: %s", processingMode), padding, y, fontSize,
+             uiData.useGPU ? GREEN : YELLOW);
+
 }

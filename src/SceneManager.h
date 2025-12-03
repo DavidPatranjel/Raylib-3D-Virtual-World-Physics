@@ -14,6 +14,7 @@ struct UIData {
     int time;
     FMode mode;
     GenMode genMode;
+    bool useGPU;
 };
 
 class SceneManager {

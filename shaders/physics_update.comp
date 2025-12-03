@@ -1,0 +1,88 @@
+#version 430
+
+layout(local_size_x = 256) in;
+
+struct PhysicsData {
+    vec3 position;
+    float padding1;
+    vec3 velocity;
+    float padding2;
+    vec3 rotationAxis;
+    float radius;
+    int objectType;
+    int collisionFlag;
+    vec2 padding3;
+};
+
+layout(std430, binding = 0) buffer PhysicsBuffer {
+    PhysicsData objects[];
+};
+
+uniform float deltaTime;
+uniform float gravity;
+uniform float frictionInv;
+uniform float spaceLimits;
+uniform float energyLoss;
+
+void main() {
+    uint idx = gl_GlobalInvocationID.x;
+    uint objectCount = objects.length();
+
+    if (idx >= objectCount)
+        return;
+
+    PhysicsData obj = objects[idx];
+
+    // Apply gravity
+    obj.velocity.y -= gravity * deltaTime;
+
+    // Apply friction
+    obj.velocity *= frictionInv;
+
+    // Update position
+    obj.position += obj.velocity * deltaTime;
+
+    // Boundary collision
+    float limits = spaceLimits - 0.1;
+    float limitOffset = 0.001;
+    bool collided = false;
+
+    // Check all boundaries
+    if (obj.position.x > limits) {
+        obj.position.x = limits - limitOffset;
+        obj.velocity.x = -obj.velocity.x * energyLoss;
+        collided = true;
+    } else if (obj.position.x < -limits) {
+        obj.position.x = -limits + limitOffset;
+        obj.velocity.x = -obj.velocity.x * energyLoss;
+        collided = true;
+    }
+
+    if (obj.position.y > limits) {
+        obj.position.y = limits - limitOffset;
+        obj.velocity.y = -obj.velocity.y * energyLoss;
+        collided = true;
+    } else if (obj.position.y < -limits) {
+        obj.position.y = -limits + limitOffset;
+        obj.velocity.y = -obj.velocity.y * energyLoss;
+        collided = true;
+    }
+
+    if (obj.position.z > limits) {
+        obj.position.z = limits - limitOffset;
+        obj.velocity.z = -obj.velocity.z * energyLoss;
+        collided = true;
+    } else if (obj.position.z < -limits) {
+        obj.position.z = -limits + limitOffset;
+        obj.velocity.z = -obj.velocity.z * energyLoss;
+        collided = true;
+    }
+
+    if (collided) {
+        obj.collisionFlag = 1;
+    } else {
+        obj.collisionFlag = 0;
+    }
+
+    objects[idx] = obj;
+}

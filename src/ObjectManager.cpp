@@ -14,11 +14,12 @@
 
 
 ObjectManager::ObjectManager(const Vector3 boxCenter, const float boxSize)
-    : boxSize(boxSize), boxCenter(boxCenter)
+    : boxSize(boxSize), boxCenter(boxCenter), useGPU(true)
 {
     CreateCubeVertices();
     CreateSphereVertices();
     CreateCylinderVertices();
+    gpuPhysics.Initialize();
 }
 
 void ObjectManager::SpawnRandomObject()
@@ -87,7 +88,6 @@ void ObjectManager::setLocalVertices(PhysicsObject &object) const
     if (object.GetType() == ObjectType::SPHERE)
         object.SetLocalVertices(sphereVertices);
 }
-
 void ObjectManager::Update(float deltaTime, bool debug) {
     std::chrono::time_point<std::chrono::high_resolution_clock> start, end;
 
@@ -99,22 +99,40 @@ void ObjectManager::Update(float deltaTime, bool debug) {
     if (debug)
         HandleMoveDebugObjects();
 
-    for (auto& obj : objects)
-        obj.Update(deltaTime);
+    if (useGPU && gpuPhysics.IsInitialized()) {
+        // GPU path
+        gpuPhysics.UploadObjects(objects);
+        gpuPhysics.UpdatePhysics(deltaTime);
+        gpuPhysics.DetectCollisions();
+        gpuPhysics.DownloadResults(objects);
+
+        // Update rotations and transforms on CPU
+        for (auto& obj : objects) {
+            obj.Rotate();
+            Matrix matTranslation = MatrixTranslate(obj.GetPosition().x,
+                                                   obj.GetPosition().y,
+                                                   obj.GetPosition().z);
+            Matrix rotMat = obj.GetRotationMatrix();
+            Matrix transform = MatrixMultiply(rotMat, matTranslation);
+            obj.SetTransform(transform);  // <-- ADD THIS LINE!
+        }
+    } else {
+        // CPU path (original code)
+        for (auto& obj : objects)
+            obj.Update(deltaTime);
+        CheckCollisions();
+    }
 
     if (IsKeyPressed(KEY_R))
         Clear();
-
-    CheckCollisions();
 
     if (!firstMeasurementDone) {
         end = std::chrono::high_resolution_clock::now();
         std::chrono::duration<float, std::milli> duration = end - start;
         physics_time = duration.count();
-        firstMeasurementDone = true; // don’t measure again
+        firstMeasurementDone = true;
     }
 }
-
 
 void ObjectManager::HandleMoveDebugObjects() {
     if (IsKeyPressed(KEY_FOUR)) {
@@ -186,8 +204,8 @@ Vector3 ObjectManager::GetRandomVelocity() const
 
 Color ObjectManager::GetRandomColor() const
 {
-    constexpr Color colors[] = {RED, GREEN, BLUE, YELLOW, PURPLE, ORANGE, PINK, LIME, GOLD, SKYBLUE};
-    return colors[GetRandomValue(0, 9)];
+    constexpr Color colors[] = {GREEN, BLUE, YELLOW, PURPLE, ORANGE, PINK, LIME, GOLD, SKYBLUE};
+    return colors[GetRandomValue(0, 8)];
 }
 
 ObjectType ObjectManager::GetRandomObjectType() const
@@ -293,4 +311,11 @@ void ObjectManager::CreateCylinderVertices()
         normals.push_back({0.0f, 1.0f, 0.0f});
 
 
+}
+
+void ObjectManager::SetUseGPU(bool enabled) {
+    if (enabled && !gpuPhysics.IsInitialized()) {
+        gpuPhysics.Initialize();
+    }
+    useGPU = enabled && gpuPhysics.IsInitialized();
 }

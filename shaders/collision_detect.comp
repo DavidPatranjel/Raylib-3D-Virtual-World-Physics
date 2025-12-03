@@ -1,0 +1,45 @@
+#version 430
+
+layout(local_size_x = 16, local_size_y = 16) in;
+
+struct PhysicsData {
+    vec3 position;
+    float padding1;
+    vec3 velocity;
+    float padding2;
+    vec3 rotationAxis;
+    float radius;
+    int objectType;
+    int collisionFlag;
+    vec2 padding3;
+};
+
+layout(std430, binding = 0) buffer PhysicsBuffer {
+    PhysicsData objects[];
+};
+
+uniform int objectCount;
+
+void main() {
+    uint i = gl_GlobalInvocationID.x;
+    uint j = gl_GlobalInvocationID.y;
+
+    // Only check upper triangle of collision matrix (avoid duplicates)
+    if (i >= objectCount || j >= objectCount || i >= j)
+        return;
+
+    PhysicsData objA = objects[i];
+    PhysicsData objB = objects[j];
+
+    // Broad phase: bounding sphere check
+    vec3 diff = objB.position - objA.position;
+    float distSq = dot(diff, diff);
+    float radiusSum = objA.radius + objB.radius;
+
+    if (distSq > radiusSum * radiusSum)
+        return;
+
+    // Collision detected - mark both objects
+    objects[i].collisionFlag = 1;
+    objects[j].collisionFlag = 1;
+}
