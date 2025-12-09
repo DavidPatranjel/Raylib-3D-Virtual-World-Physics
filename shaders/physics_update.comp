@@ -4,9 +4,9 @@ layout(local_size_x = 256) in;
 
 struct PhysicsData {
     vec3 position;
-    float padding1;
+    float rotationAngle;    // Rotation angle in radians
     vec3 velocity;
-    float padding2;
+    float rotationSpeed;    // Rotation speed per frame
     vec3 rotationAxis;
     float radius;
     int objectType;
@@ -41,6 +41,9 @@ void main() {
 
     // Update position
     obj.position += obj.velocity * deltaTime;
+
+    // Update rotation angle
+    obj.rotationAngle += obj.rotationSpeed;
 
     // Boundary collision
     float limits = spaceLimits - 0.1;

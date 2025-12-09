@@ -8,7 +8,7 @@
 #include <ostream>
 
 #include "raymath.h"
-#define CYLINDER_SIDES 4
+#define CYLINDER_SIDES 32
 #define CYLINDER_RADIUS 0.1
 #define CYLINDER_HEIGHT 0.2
 
@@ -26,7 +26,11 @@ std::vector<Vector3> PhysicsObject::GetLocalVertices() { return this->localVerti
 
 Matrix PhysicsObject::GetTransform() const { return this->transform; }
 
-// Matrix PhysicsObject::GetRotationMatrix() const { return this->rotationMatrix; }
+Matrix PhysicsObject::GetRotationMatrix() const { return this->rotationMatrix; }
+
+Vector3 PhysicsObject::GetRotationAxis() const { return this->rotationAxis; }
+
+float PhysicsObject::GetRotationAngle() const { return this->totalRotationAngle; }
 
 void PhysicsObject::SetColor(const Color inputColor) { this->color = inputColor; }
 
@@ -74,22 +78,31 @@ void PhysicsObject::SetLocalVertices(const std::vector<Vector3> inputLocalVertic
 }
 
 
-// void PhysicsObject::SetRandomRotationAxis()
-// {
-//     do
-//     {
-//         rotationAxis.x = static_cast<float>(GetRandomValue(-1.0f, 1.0f));
-//         rotationAxis.y = static_cast<float>(GetRandomValue(-1.0f, 1.0f));
-//         rotationAxis.z = static_cast<float>(GetRandomValue(-1.0f, 1.0f));
-//     }
-//     while (rotationAxis.x == 0.0f || rotationAxis.y == 0.0f || rotationAxis.z == 0.0f);
-// }
+void PhysicsObject::SetRandomRotationAxis()
+{
+    do
+    {
+        rotationAxis.x = static_cast<float>(GetRandomValue(-100, 100)) / 100.0f;
+        rotationAxis.y = static_cast<float>(GetRandomValue(-100, 100)) / 100.0f;
+        rotationAxis.z = static_cast<float>(GetRandomValue(-100, 100)) / 100.0f;
+    }
+    while (fabsf(rotationAxis.x) < 0.01f && fabsf(rotationAxis.y) < 0.01f && fabsf(rotationAxis.z) < 0.01f);
+    rotationAxis = Vector3Normalize(rotationAxis);
+}
+
+void PhysicsObject::SetRotationAngle(float angle)
+{
+    this->totalRotationAngle = angle;
+    this->rotationMatrix = MatrixRotate(rotationAxis, totalRotationAngle);
+}
 
 PhysicsObject::PhysicsObject(ObjectType type)
     : type(type), position({0.0f, 0.0f, 0.0f}), velocity({0.0f, 0.0f, 0.0f})
 {
-    // SetRandomRotationAxis();
+    SetRandomRotationAxis();
     transform = MatrixIdentity();
+    rotationMatrix = MatrixIdentity();
+    totalRotationAngle = 0.0f;
     isColliding = false;
     size = 0.1;
     radius = 0.1;
@@ -110,8 +123,10 @@ PhysicsObject::PhysicsObject(ObjectType type)
 PhysicsObject::PhysicsObject(ObjectType type, Vector3 position, Vector3 velocity, Color color) : type(type),
     position(position), velocity(velocity), color(color)
 {
-    // SetRandomRotationAxis();
+    SetRandomRotationAxis();
     transform = MatrixIdentity();
+    rotationMatrix = MatrixIdentity();
+    totalRotationAngle = 0.0f;
     isColliding = false;
     size = 0.1;
     radius = 0.1;
@@ -128,26 +143,21 @@ void PhysicsObject::Update(const float deltaTime)
 {
     position = Vector3Add(position, Vector3Scale(velocity, deltaTime));
 
-    // Rotate();
+    Rotate();
 
-
-    // Matrix matTranslation = MatrixTranslate(position.x, position.y, position.z);
-    // transform = MatrixMultiply(rotationMatrix, matTranslation);
-
-    // no need for matrix multiply if there's only a translation
-    transform = MatrixTranslate(position.x, position.y, position.z);
-
+    Matrix matTranslation = MatrixTranslate(position.x, position.y, position.z);
+    transform = MatrixMultiply(rotationMatrix, matTranslation);
 
     HandlePhysics(deltaTime);
 }
 
 
-    // void PhysicsObject::Rotate()
-    // {
-    //     const Matrix rotStep = MatrixRotate(Vector3Normalize(rotationAxis), rotationSpeed);
-    //     rotationMatrix = MatrixMultiply(rotStep, rotationMatrix);
-    //     totalRotationAngle += rotationSpeed;
-    // }
+void PhysicsObject::Rotate()
+{
+    const Matrix rotStep = MatrixRotate(Vector3Normalize(rotationAxis), rotationSpeed);
+    rotationMatrix = MatrixMultiply(rotStep, rotationMatrix);
+    totalRotationAngle += rotationSpeed;
+}
 
 void PhysicsObject::Draw()
 {
@@ -161,7 +171,7 @@ void PhysicsObject::Draw()
 
 void PhysicsObject::CreateCylinderMesh()
 {
-    const int SIDES = 6;
+    const int SIDES = 32;
     const float RADIUS = CYLINDER_RADIUS;
     const float HEIGHT = CYLINDER_HEIGHT;
 

@@ -14,9 +14,9 @@
 
 struct GPUPhysicsData {
     Vector3 position;
-    float padding1;
+    float rotationAngle;    // Rotation angle in radians (was padding1)
     Vector3 velocity;
-    float padding2;
+    float rotationSpeed;    // Rotation speed (was padding2)
     Vector3 rotationAxis;
     float radius;
     int objectType;

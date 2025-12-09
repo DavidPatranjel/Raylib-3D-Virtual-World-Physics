@@ -5,7 +5,7 @@
 #include "ObjectManager.h"
 #include <chrono>
 
-#define CYLINDER_SIDES 8
+#define CYLINDER_SIDES 32
 #define CYLINDER_RADIUS 0.1
 #define CYLINDER_HEIGHT 0.2
 #define CUBE_HALF_LEN 0.1
@@ -106,23 +106,14 @@ void ObjectManager::Update(float deltaTime, bool debug) {
         gpuPhysics.DetectCollisions();
         gpuPhysics.DownloadResults(objects);
 
-        // OLD - WITH ROTATION !!! Update rotations and transforms on CPU
-        // for (auto& obj : objects) {
-        //     obj.Rotate();
-        //     Matrix matTranslation = MatrixTranslate(obj.GetPosition().x,
-        //                                            obj.GetPosition().y,
-        //                                            obj.GetPosition().z);
-        //     Matrix rotMat = obj.GetRotationMatrix();
-        //     Matrix transform = MatrixMultiply(rotMat, matTranslation);
-        //     obj.SetTransform(transform);  // <-- ADD THIS LINE!
-        // }
-
-        // NEW - NO ROTATION
+        // Update rotations and transforms on CPU (rotation angle comes back from GPU)
         for (auto& obj : objects) {
             Matrix matTranslation = MatrixTranslate(obj.GetPosition().x,
                                                    obj.GetPosition().y,
                                                    obj.GetPosition().z);
-            obj.SetTransform(matTranslation);  // <-- ADD THIS LINE!
+            Matrix rotMat = obj.GetRotationMatrix();
+            Matrix transform = MatrixMultiply(rotMat, matTranslation);
+            obj.SetTransform(transform);
         }
     } else {
         // CPU path (original code)

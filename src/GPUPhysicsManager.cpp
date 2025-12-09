@@ -125,13 +125,13 @@ void GPUPhysicsManager::UploadObjects(const std::vector<PhysicsObject>& objects)
     for (const auto& obj : objects){
         GPUPhysicsData data;
         data.position = obj.GetPosition();
+        data.rotationAngle = obj.GetRotationAngle();
         data.velocity = obj.GetVelocity();
-        data.rotationAxis = {0, 0, 0};
+        data.rotationSpeed = 0.03f;  // Match the rotation speed from PhysicsObject
+        data.rotationAxis = obj.GetRotationAxis();
         data.radius = obj.GetRadius();
         data.objectType = static_cast<int>(obj.GetType());
         data.collisionFlag = 0;
-        data.padding1 = 0.0f;
-        data.padding2 = 0.0f;
         data.padding3[0] = 0.0f;
         data.padding3[1] = 0.0f;
 
@@ -224,6 +224,7 @@ void GPUPhysicsManager::DownloadResults(std::vector<PhysicsObject>& objects) {
     for (int i = 0; i < objectCount && i < objects.size(); i++) {
         objects[i].SetPosition(gpuData[i].position);
         objects[i].SetVelocity(gpuData[i].velocity);
+        objects[i].SetRotationAngle(gpuData[i].rotationAngle);
         objects[i].SetIsColliding(gpuData[i].collisionFlag == 1);
     }
 }
