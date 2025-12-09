@@ -48,41 +48,42 @@ void main() {
     // Boundary collision
     float limits = spaceLimits - 0.1;
     float limitOffset = 0.001;
-    bool collided = false;
+    bool wallCollided = false;
 
     // Check all boundaries
+    
     if (obj.position.x > limits) {
         obj.position.x = limits - limitOffset;
         obj.velocity.x = -obj.velocity.x * energyLoss;
-        collided = true;
+        wallCollided = true;
     } else if (obj.position.x < -limits) {
         obj.position.x = -limits + limitOffset;
         obj.velocity.x = -obj.velocity.x * energyLoss;
-        collided = true;
+        wallCollided = true;
     }
 
     if (obj.position.y > limits) {
         obj.position.y = limits - limitOffset;
         obj.velocity.y = -obj.velocity.y * energyLoss;
-        collided = true;
+        wallCollided = true;
     } else if (obj.position.y < -limits) {
         obj.position.y = -limits + limitOffset;
         obj.velocity.y = -obj.velocity.y * energyLoss;
-        collided = true;
+        wallCollided = true;
     }
 
     if (obj.position.z > limits) {
         obj.position.z = limits - limitOffset;
         obj.velocity.z = -obj.velocity.z * energyLoss;
-        collided = true;
+        wallCollided = true;
     } else if (obj.position.z < -limits) {
         obj.position.z = -limits + limitOffset;
         obj.velocity.z = -obj.velocity.z * energyLoss;
-        collided = true;
+        wallCollided = true;
     }
 
-    if (collided) {
-        obj.collisionFlag = 1;
+    if (wallCollided) {
+        obj.collisionFlag = 0;
     } else {
         obj.collisionFlag = 0;
     }

@@ -102,8 +102,8 @@ void ObjectManager::Update(float deltaTime, bool debug) {
     if (useGPU && gpuPhysics.IsInitialized()) {
         // GPU path
         gpuPhysics.UploadObjects(objects);
-        gpuPhysics.UpdatePhysics(deltaTime);
         gpuPhysics.DetectCollisions();
+        gpuPhysics.UpdatePhysics(deltaTime);
         gpuPhysics.DownloadResults(objects);
 
         // Update rotations and transforms on CPU (rotation angle comes back from GPU)

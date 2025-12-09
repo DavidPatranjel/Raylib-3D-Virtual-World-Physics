@@ -14,9 +14,9 @@
 
 struct GPUPhysicsData {
     Vector3 position;
-    float rotationAngle;    // Rotation angle in radians (was padding1)
+    float rotationAngle;
     Vector3 velocity;
-    float rotationSpeed;    // Rotation speed (was padding2)
+    float rotationSpeed;
     Vector3 rotationAxis;
     float radius;
     int objectType;
@@ -26,8 +26,8 @@ struct GPUPhysicsData {
 
 class GPUPhysicsManager {
 private:
-    unsigned int computePhysicsProgram;      // Changed from Shader
-    unsigned int computeCollisionProgram;    // Changed from Shader
+    unsigned int computePhysicsProgram;
+    unsigned int computeCollisionProgram;
     unsigned int physicsSSBO;
     std::vector<GPUPhysicsData> gpuData;
     int objectCount;
