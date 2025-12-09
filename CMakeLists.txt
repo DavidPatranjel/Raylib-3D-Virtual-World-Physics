@@ -48,5 +48,5 @@ if (WIN32)
 endif()
 
 # Copy resources to build directory (add this when you have assets)
-# file(COPY ${CMAKE_SOURCE_DIR}/resources DESTINATION ${CMAKE_BINARY_DIR})
-file(COPY ${CMAKE_SOURCE_DIR}/shaders DESTINATION ${CMAKE_BINARY_DIR})
+configure_file(shaders/collision_detect.comp ${CMAKE_BINARY_DIR}/shaders COPYONLY)
+configure_file(shaders/physics_update.comp ${CMAKE_BINARY_DIR}/shaders COPYONLY)
