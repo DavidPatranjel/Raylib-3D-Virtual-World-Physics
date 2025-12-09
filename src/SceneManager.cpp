@@ -31,6 +31,13 @@ void SceneManager::Update() {
         objectManager.SetUseGPU(!objectManager.IsUsingGPU());
     }
 
+    if (IsKeyPressed(KEY_L)) {
+        if (!IsCursorHidden())
+            DisableCursor();
+        else
+            EnableCursor();
+    }
+
     functioningMode.Update();
     VerifyModeModification();
 

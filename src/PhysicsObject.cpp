@@ -165,7 +165,7 @@ void PhysicsObject::Draw()
 
     model.transform = this->transform;
 
-    DrawModelWires(model, {0.0f, 0.0f, 0.0f}, 1.0f, renderColor);
+    DrawModel(model, {0.0f, 0.0f, 0.0f}, 1.0f, renderColor);
 }
 
 
