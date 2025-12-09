@@ -122,7 +122,7 @@ void GPUPhysicsManager::UploadObjects(const std::vector<PhysicsObject>& objects)
     gpuData.clear();
     gpuData.reserve(objectCount);
 
-    for (const auto& obj : objects) {
+    for (const auto& obj : objects){
         GPUPhysicsData data;
         data.position = obj.GetPosition();
         data.velocity = obj.GetVelocity();

@@ -26,7 +26,7 @@ void main() {
 
     // Only check upper triangle of collision matrix (avoid duplicates)
     if (i >= objectCount || j >= objectCount || i >= j)
-        return;
+    return;
 
     PhysicsData objA = objects[i];
     PhysicsData objB = objects[j];

@@ -40,7 +40,7 @@ public:
     UIData GetUIData() const;
     void Update();
     void Draw();
-    void VerifyModeModif();
+    void VerifyModeModification();
     void GenerateDebugObjects();
     void GenerateObjects(GenMode genMode);
 };

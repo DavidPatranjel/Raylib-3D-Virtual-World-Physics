@@ -36,6 +36,7 @@ add_executable(mmo-virtual-world
         src/CollisionDetector.h
         src/GPUPhysicsManager.cpp
         src/GPUPhysicsManager.h
+        src/GPUPhysicsManager.cpp
 )
 
 # Link Raylib

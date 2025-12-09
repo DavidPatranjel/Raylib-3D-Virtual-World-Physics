@@ -26,7 +26,7 @@ std::vector<Vector3> PhysicsObject::GetLocalVertices() { return this->localVerti
 
 Matrix PhysicsObject::GetTransform() const { return this->transform; }
 
-Matrix PhysicsObject::GetRotationMatrix() const { return this->rotationMatrix; }
+// Matrix PhysicsObject::GetRotationMatrix() const { return this->rotationMatrix; }
 
 void PhysicsObject::SetColor(const Color inputColor) { this->color = inputColor; }
 
@@ -44,33 +44,51 @@ void PhysicsObject::SetLocalVertices(const std::vector<Vector3> inputLocalVertic
 
     if (this->type == ObjectType::CYLINDER) { CreateCylinderMesh(); }
 
-    float maxDistSq = 0.0f;
-    for (const auto &v: localVertices)
+    if (this->type == ObjectType::CUBE || this->type == ObjectType::CYLINDER)
     {
-        float distSq = v.x * v.x + v.y * v.y + v.z * v.z;
-        if (distSq > maxDistSq)
-            maxDistSq = distSq;
+        // For cubes: use half-length (max coordinate) as radius
+        // For cylinders: use max(cylinder_radius, half_height) as radius
+        // This gives accurate face-to-face / side-to-side collision detection
+        float maxCoord = 0.0f;
+        for (const auto &v: localVertices)
+        {
+            maxCoord = fmaxf(maxCoord, fabsf(v.x));
+            maxCoord = fmaxf(maxCoord, fabsf(v.y));
+            maxCoord = fmaxf(maxCoord, fabsf(v.z));
+        }
+        this->radius = maxCoord;
     }
-    this->radius = sqrtf(maxDistSq);
+    else
+    {
+        // For spheres, use corner distance (bounding sphere)
+        float maxDistSq = 0.0f;
+        for (const auto &v: localVertices)
+        {
+            float distSq = v.x * v.x + v.y * v.y + v.z * v.z;
+            if (distSq > maxDistSq)
+                maxDistSq = distSq;
+        }
+        this->radius = sqrtf(maxDistSq);
+    }
     if (this->radius == 0) this->radius = 0.1f;
 }
 
 
-void PhysicsObject::SetRandomRotationAxis()
-{
-    do
-    {
-        rotationAxis.x = static_cast<float>(GetRandomValue(-1.0f, 1.0f));
-        rotationAxis.y = static_cast<float>(GetRandomValue(-1.0f, 1.0f));
-        rotationAxis.z = static_cast<float>(GetRandomValue(-1.0f, 1.0f));
-    }
-    while (rotationAxis.x == 0.0f || rotationAxis.y == 0.0f || rotationAxis.z == 0.0f);
-}
+// void PhysicsObject::SetRandomRotationAxis()
+// {
+//     do
+//     {
+//         rotationAxis.x = static_cast<float>(GetRandomValue(-1.0f, 1.0f));
+//         rotationAxis.y = static_cast<float>(GetRandomValue(-1.0f, 1.0f));
+//         rotationAxis.z = static_cast<float>(GetRandomValue(-1.0f, 1.0f));
+//     }
+//     while (rotationAxis.x == 0.0f || rotationAxis.y == 0.0f || rotationAxis.z == 0.0f);
+// }
 
 PhysicsObject::PhysicsObject(ObjectType type)
     : type(type), position({0.0f, 0.0f, 0.0f}), velocity({0.0f, 0.0f, 0.0f})
 {
-    SetRandomRotationAxis();
+    // SetRandomRotationAxis();
     transform = MatrixIdentity();
     isColliding = false;
     size = 0.1;
@@ -92,7 +110,7 @@ PhysicsObject::PhysicsObject(ObjectType type)
 PhysicsObject::PhysicsObject(ObjectType type, Vector3 position, Vector3 velocity, Color color) : type(type),
     position(position), velocity(velocity), color(color)
 {
-    SetRandomRotationAxis();
+    // SetRandomRotationAxis();
     transform = MatrixIdentity();
     isColliding = false;
     size = 0.1;
@@ -110,21 +128,26 @@ void PhysicsObject::Update(const float deltaTime)
 {
     position = Vector3Add(position, Vector3Scale(velocity, deltaTime));
 
-    Rotate();
+    // Rotate();
 
-    Matrix matTranslation = MatrixTranslate(position.x, position.y, position.z);
-    transform = MatrixMultiply(rotationMatrix, matTranslation);
+
+    // Matrix matTranslation = MatrixTranslate(position.x, position.y, position.z);
+    // transform = MatrixMultiply(rotationMatrix, matTranslation);
+
+    // no need for matrix multiply if there's only a translation
+    transform = MatrixTranslate(position.x, position.y, position.z);
+
 
     HandlePhysics(deltaTime);
 }
 
 
-void PhysicsObject::Rotate()
-{
-    const Matrix rotStep = MatrixRotate(Vector3Normalize(rotationAxis), rotationSpeed);
-    rotationMatrix = MatrixMultiply(rotStep, rotationMatrix);
-    totalRotationAngle += rotationSpeed;
-}
+    // void PhysicsObject::Rotate()
+    // {
+    //     const Matrix rotStep = MatrixRotate(Vector3Normalize(rotationAxis), rotationSpeed);
+    //     rotationMatrix = MatrixMultiply(rotStep, rotationMatrix);
+    //     totalRotationAngle += rotationSpeed;
+    // }
 
 void PhysicsObject::Draw()
 {
@@ -132,7 +155,7 @@ void PhysicsObject::Draw()
 
     model.transform = this->transform;
 
-    DrawModel(model, {0.0f, 0.0f, 0.0f}, 1.0f, renderColor);
+    DrawModelWires(model, {0.0f, 0.0f, 0.0f}, 1.0f, renderColor);
 }
 
 

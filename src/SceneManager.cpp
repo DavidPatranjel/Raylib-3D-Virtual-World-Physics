@@ -32,7 +32,7 @@ void SceneManager::Update() {
     }
 
     functioningMode.Update();
-    VerifyModeModif();
+    VerifyModeModification();
 
     const bool debug = functioningMode.GetMode() == FMode::DEBUG_MODE;
     objectManager.Update(GetFrameTime(), debug);
@@ -53,7 +53,7 @@ UIData SceneManager::GetUIData() const {
     };
 }
 
-void SceneManager::VerifyModeModif() {
+void SceneManager::VerifyModeModification() {
     AllModes modes = functioningMode.GetAllModes();
 
     if (modes.mode != oldMode.mode || modes.genMode != oldMode.genMode) {

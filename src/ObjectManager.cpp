@@ -106,15 +106,23 @@ void ObjectManager::Update(float deltaTime, bool debug) {
         gpuPhysics.DetectCollisions();
         gpuPhysics.DownloadResults(objects);
 
-        // Update rotations and transforms on CPU
+        // OLD - WITH ROTATION !!! Update rotations and transforms on CPU
+        // for (auto& obj : objects) {
+        //     obj.Rotate();
+        //     Matrix matTranslation = MatrixTranslate(obj.GetPosition().x,
+        //                                            obj.GetPosition().y,
+        //                                            obj.GetPosition().z);
+        //     Matrix rotMat = obj.GetRotationMatrix();
+        //     Matrix transform = MatrixMultiply(rotMat, matTranslation);
+        //     obj.SetTransform(transform);  // <-- ADD THIS LINE!
+        // }
+
+        // NEW - NO ROTATION
         for (auto& obj : objects) {
-            obj.Rotate();
             Matrix matTranslation = MatrixTranslate(obj.GetPosition().x,
                                                    obj.GetPosition().y,
                                                    obj.GetPosition().z);
-            Matrix rotMat = obj.GetRotationMatrix();
-            Matrix transform = MatrixMultiply(rotMat, matTranslation);
-            obj.SetTransform(transform);  // <-- ADD THIS LINE!
+            obj.SetTransform(matTranslation);  // <-- ADD THIS LINE!
         }
     } else {
         // CPU path (original code)
@@ -136,7 +144,7 @@ void ObjectManager::Update(float deltaTime, bool debug) {
 
 void ObjectManager::HandleMoveDebugObjects() {
     if (IsKeyPressed(KEY_FOUR)) {
-        Vector3 newVelocity = {.5f, 0.0f, 0.0f};
+        Vector3 newVelocity = {1.5f, 0.0f, 0.0f};
         for (int i = 1; i < GetObjectCount(); i+=2)
         {
             objects.at(i).SetVelocity(newVelocity);
@@ -150,7 +158,7 @@ void ObjectManager::HandleMoveDebugObjects() {
     }
 
     if (IsKeyPressed(KEY_SIX)) {
-        Vector3 newVelocity = {-.5f, 0.0f, 0.0f};
+        Vector3 newVelocity = {-1.5f, 0.0f, 0.0f};
         for (int i = 1; i < GetObjectCount(); i+=2)
         {
             objects.at(i).SetVelocity(newVelocity);

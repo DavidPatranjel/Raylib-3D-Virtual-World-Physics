@@ -4,9 +4,9 @@
 
 #ifndef INC_3DVIRTUALWORLDPHYSICS_PHYSICSOBJECT_H
 #define INC_3DVIRTUALWORLDPHYSICS_PHYSICSOBJECT_H
-#define GRAVITY 9.8f
+#define GRAVITY 0.0f
 #define FRICTION_INV 0.98f
-#define SPACE_LIMITS 3
+#define SPACE_LIMITS 100
 #define ENERGY_LOSS 0.9f
 
 #include "raylib.h"
@@ -28,17 +28,17 @@ private:
     std::vector<Vector3> localVertices;
     Vector3 position = {0, 0, 0};
     Vector3 velocity;
-    Vector3 rotationAxis;
+    // Vector3 rotationAxis;
     Vector3 center;
 
     bool isColliding;
-    float rotationSpeed = 0.03;
+    // float rotationSpeed = 0.03;
     float size;
     float radius;
     Color color;
 
-    float totalRotationAngle = 0;
-    Matrix rotationMatrix = MatrixIdentity();
+    // float totalRotationAngle = 0;
+    // Matrix rotationMatrix = MatrixIdentity();
     Matrix transform = MatrixIdentity();
 
 public:
@@ -61,7 +61,7 @@ public:
 
     [[nodiscard]] Matrix GetTransform() const;
 
-    [[nodiscard]] Matrix GetRotationMatrix() const;
+    // [[nodiscard]] Matrix GetRotationMatrix() const;
 
 
     void SetColor(Color inputColor);
@@ -74,7 +74,7 @@ public:
 
     void SetLocalVertices(const std::vector<Vector3> inputLocalVertices);
 
-    void SetRandomRotationAxis();
+    // void SetRandomRotationAxis();
 
     void Update(float deltaTime);
 
@@ -84,7 +84,7 @@ public:
 
     void DrawSphere();
 
-    void Rotate();
+    // void Rotate();
 
     void DrawCylinder(Color renderColor);
 
