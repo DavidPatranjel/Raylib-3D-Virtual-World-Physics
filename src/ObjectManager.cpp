@@ -102,6 +102,7 @@ void ObjectManager::Update(float deltaTime, bool debug) {
     if (useGPU && gpuPhysics.IsInitialized()) {
         // GPU path
         gpuPhysics.UploadObjects(objects);
+        gpuPhysics.ResetCollisionFlags();
         gpuPhysics.DetectCollisions();
         gpuPhysics.UpdatePhysics(deltaTime);
         gpuPhysics.DownloadResults(objects);

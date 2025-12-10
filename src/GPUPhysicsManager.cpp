@@ -101,6 +101,12 @@ void GPUPhysicsManager::Initialize() {
         return;
     }
 
+    computeResetFlagsProgram = LoadComputeShader("shaders/reset_flags.comp");
+    if (computeResetFlagsProgram == 0) {
+        std::cerr << "Failed to load reset flags compute shader!" << std::endl;
+        return;
+    }
+
     // Create Shader Storage Buffer Object
     glGenBuffers(1, &physicsSSBO);
     std::cout << "✓ SSBO created (ID: " << physicsSSBO << ")" << std::endl;
@@ -227,7 +233,24 @@ void GPUPhysicsManager::DownloadResults(std::vector<PhysicsObject>& objects) {
         objects[i].SetRotationAngle(gpuData[i].rotationAngle);
         objects[i].SetIsColliding(gpuData[i].collisionFlag == 1);
     }
+
 }
+
+void GPUPhysicsManager::ResetCollisionFlags() {
+    if (!initialized || objectCount == 0) return;
+
+    glUseProgram(computeResetFlagsProgram);
+
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, physicsSSBO);
+
+    int workGroups = (objectCount + 255) / 256;
+    glDispatchCompute(workGroups, 1, 1);
+
+    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
+    glUseProgram(0);
+}
+
 
 void GPUPhysicsManager::Cleanup() {
     if (physicsSSBO != 0) {

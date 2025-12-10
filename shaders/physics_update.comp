@@ -82,11 +82,17 @@ void main() {
         wallCollided = true;
     }
 
-    if (wallCollided) {
-        obj.collisionFlag = 0;
-    } else {
-        obj.collisionFlag = 0;
+
+    if(obj.collisionFlag == 1)
+    {
+        //obj.velocity = -obj.velocity * energyLoss;
     }
+
+    if(wallCollided)
+    {
+        obj.collisionFlag = 1;
+    }
+
 
     objects[idx] = obj;
 }

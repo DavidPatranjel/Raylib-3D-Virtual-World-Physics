@@ -28,6 +28,7 @@ class GPUPhysicsManager {
 private:
     unsigned int computePhysicsProgram;
     unsigned int computeCollisionProgram;
+    unsigned int computeResetFlagsProgram;
     unsigned int physicsSSBO;
     std::vector<GPUPhysicsData> gpuData;
     int objectCount;
@@ -45,6 +46,7 @@ public:
     void UpdatePhysics(float deltaTime);
     void DetectCollisions();
     void DownloadResults(std::vector<PhysicsObject>& objects);
+    void ResetCollisionFlags();
     void Cleanup();
 
     bool IsInitialized() const { return initialized; }

@@ -1,0 +1,28 @@
+#version 430
+
+layout(local_size_x = 256) in;
+
+struct PhysicsData {
+    vec3 position;
+    float rotationAngle;
+    vec3 velocity;
+    float rotationSpeed;
+    vec3 rotationAxis;
+    float radius;
+    int objectType;
+    int collisionFlag;
+    vec2 padding3;
+};
+
+layout(std430, binding = 0) buffer PhysicsBuffer {
+    PhysicsData objects[];
+};
+
+void main() {
+    uint idx = gl_GlobalInvocationID.x;
+
+    if (idx >= objects.length())
+        return;
+
+    objects[idx].collisionFlag = 0;
+}
